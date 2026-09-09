@@ -5,5 +5,12 @@
   "description": "Extension for interacting with YouTube.",
   "action": {
     "default_popup": "popup.html"
-  }
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://www.youtube.com/*"],
+      "js": ["content.js"],
+      "css": ["content.css"]
+    }
+  ]
 }
