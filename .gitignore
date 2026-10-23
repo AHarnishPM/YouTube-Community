@@ -1,0 +1,17 @@
+# Python
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+# The corpus text IS committed. It cannot be regenerated: Wikipedia only
+# serves the plaintext extract for an article's current revision, so an old
+# revision is unrecoverable in this format (see rag/corpus/wikipedia.py).
+# At ~324K it is small enough to version, and committing it is the only way
+# a result stays reproducible.
+
+# Embedding index: regenerable from the corpus.
+data/index/
+
+# macOS
+.DS_Store

@@ -1,0 +1,157 @@
+# Evidence corpus seed list.
+# Spans the claim domains long-form video actually covers, plus deliberate
+# distractors -- topically adjacent articles that *could* plausibly compete for
+# a claim. A corpus of only correct answers measures nothing.
+# Rebuild:  python -m rag.cli build --titles-file data/corpus/titles.txt
+
+# --- climate and energy (the original 7, plus competition) ---
+Paris Agreement
+Climate change
+Carbon dioxide in Earth's atmosphere
+Solar power
+Nuclear power
+Chernobyl disaster
+International Energy Agency
+Wind power
+Hydroelectricity
+Fossil fuel
+Greenhouse gas
+Global warming potential
+Renewable energy
+Energy storage
+Electric vehicle
+Carbon capture and storage
+Kyoto Protocol
+Intergovernmental Panel on Climate Change
+Sea level rise
+Ocean acidification
+Deforestation
+Nuclear fusion
+Three Mile Island accident
+Fukushima nuclear accident
+Coal
+Natural gas
+Levelized cost of electricity
+Photovoltaics
+Grid energy storage
+Carbon tax
+
+# --- health, nutrition, medicine (heavy podcast claim territory) ---
+Vitamin D
+Intermittent fasting
+Ketogenic diet
+Saturated fat
+Dietary cholesterol
+Sugar
+Caffeine
+Creatine
+Placebo
+Randomized controlled trial
+Replication crisis
+Vaccine hesitancy
+MMR vaccine and autism
+Antibiotic resistance
+Sleep deprivation
+Circadian rhythm
+Obesity
+Type 2 diabetes
+Cardiovascular disease
+Cancer research
+Microbiome
+Mediterranean diet
+Body mass index
+Statin
+Mental health
+Depression (mood)
+Exercise
+
+# --- history (tests whether off-topic claims now find real evidence) ---
+Fall of the Western Roman Empire
+Roman Empire
+Ancient Rome
+Byzantine Empire
+Industrial Revolution
+French Revolution
+World War II
+Cold War
+Great Depression
+Black Death
+Renaissance
+Apollo program
+Space Race
+Moon landing conspiracy theories
+Silk Road
+Ottoman Empire
+Library of Alexandria
+Printing press
+
+# --- physics, space, earth science ---
+Big Bang
+General relativity
+Quantum mechanics
+Speed of light
+Black hole
+Dark matter
+Exoplanet
+Mars
+Asteroid impact avoidance
+Plate tectonics
+Earthquake
+Volcano
+Evolution
+Natural selection
+DNA
+Human genome
+CRISPR
+Antarctica
+Ozone depletion
+
+# --- economics, statistics, data literacy ---
+Inflation
+Gross domestic product
+Unemployment
+Minimum wage
+Universal basic income
+Income inequality
+Gini coefficient
+Compound interest
+Cryptocurrency
+Bitcoin
+Federal Reserve
+Supply and demand
+Correlation does not imply causation
+Statistical significance
+P-value
+Survivorship bias
+Confirmation bias
+Cognitive bias
+Sampling bias
+
+# --- technology and computing ---
+Artificial intelligence
+Machine learning
+Large language model
+Neural network
+Moore's law
+Internet
+Semiconductor
+Quantum computing
+Encryption
+Social media
+Algorithmic bias
+Self-driving car
+Battery
+Lithium
+Rare-earth element
+
+# --- media, information, platforms ---
+Misinformation
+Disinformation
+Fact-checking
+Community Notes
+YouTube
+Podcast
+Peer review
+Scientific consensus
+Media bias
+Filter bubble
