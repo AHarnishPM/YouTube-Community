@@ -1,0 +1,11 @@
+{
+  "rules": {
+    "videos": {
+      "$videoId": {
+        ".read": "auth != null",
+        ".write": "auth != null",
+        ".validate": "$videoId.matches(/^[A-Za-z0-9_-]{11}$/)"
+      }
+    }
+  }
+}
