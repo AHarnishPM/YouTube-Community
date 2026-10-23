@@ -1,0 +1,41 @@
+{
+  "source": "en.wikipedia.org",
+  "fetched_count": 7,
+  "articles": [
+    {
+      "title": "Carbon dioxide in the atmosphere of Earth",
+      "revision_id": 1375796469,
+      "url": "https://en.wikipedia.org/wiki/Carbon_dioxide_in_the_atmosphere_of_Earth"
+    },
+    {
+      "title": "Chernobyl disaster",
+      "revision_id": 1380805589,
+      "url": "https://en.wikipedia.org/wiki/Chernobyl_disaster"
+    },
+    {
+      "title": "Climate change",
+      "revision_id": 1377826917,
+      "url": "https://en.wikipedia.org/wiki/Climate_change"
+    },
+    {
+      "title": "International Energy Agency",
+      "revision_id": 1378886708,
+      "url": "https://en.wikipedia.org/wiki/International_Energy_Agency"
+    },
+    {
+      "title": "Nuclear power",
+      "revision_id": 1377638624,
+      "url": "https://en.wikipedia.org/wiki/Nuclear_power"
+    },
+    {
+      "title": "Paris Agreement",
+      "revision_id": 1378148547,
+      "url": "https://en.wikipedia.org/wiki/Paris_Agreement"
+    },
+    {
+      "title": "Solar power",
+      "revision_id": 1380558907,
+      "url": "https://en.wikipedia.org/wiki/Solar_power"
+    }
+  ]
+}

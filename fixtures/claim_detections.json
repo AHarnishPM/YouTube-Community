@@ -1,0 +1,10 @@
+[
+  {"segment_id": "fx001-0", "is_context_worthy": false, "confidence": 0.91},
+  {"segment_id": "fx001-1", "is_context_worthy": true,  "confidence": 0.95},
+  {"segment_id": "fx001-2", "is_context_worthy": false, "confidence": 0.88},
+  {"segment_id": "fx001-3", "is_context_worthy": true,  "confidence": 0.93},
+  {"segment_id": "fx001-4", "is_context_worthy": false, "confidence": 0.79},
+  {"segment_id": "fx001-5", "is_context_worthy": true,  "confidence": 0.84},
+  {"segment_id": "fx001-6", "is_context_worthy": false, "confidence": 0.72},
+  {"segment_id": "fx001-7", "is_context_worthy": true,  "confidence": 0.90}
+]

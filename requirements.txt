@@ -1,0 +1,15 @@
+# Embeddings / models
+sentence-transformers==6.2.0
+numpy==2.5.4
+
+# Lexical retrieval baseline (see DESIGN-LOG D-03)
+rank-bm25==0.2.2
+
+# Corpus fetching + Ollama HTTP
+requests>=2.32
+
+# Typed interface contracts (see DESIGN-LOG "Interface contracts")
+pydantic>=2.9
+
+# Tests
+pytest>=8.0
