@@ -1,0 +1,13 @@
+{
+  "video_id": "synthetic-captions",
+  "category": "lecture",
+  "synthetic": true,
+  "caption_source": "invented software fixture",
+  "language": "en",
+  "captions": [
+    {"start":0,"duration":8,"text":"Welcome to this example."},
+    {"start":8,"duration":8,"text":"The study found that participation"},
+    {"start":16,"duration":8,"text":"increased by 25 percent."},
+    {"start":24,"duration":6,"text":"Tell us what you think."}
+  ]
+}

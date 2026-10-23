@@ -1,0 +1,8 @@
+{
+  "segments": [
+    {"segment_id":"synthetic-b-1","video_id":"synthetic-b","start":0,"end":10,"text":"Researchers found that this treatment reduces recovery time by 20 percent."},
+    {"segment_id":"synthetic-b-2","video_id":"synthetic-b","start":10,"end":20,"text":"Please subscribe and tell me your favorite color."}
+  ],
+  "detector": "rules",
+  "threshold": 0.5
+}

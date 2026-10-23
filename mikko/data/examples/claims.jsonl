@@ -1,0 +1,8 @@
+{"segment_id":"synthetic-a-1","video_id":"synthetic-a","start":0,"end":10,"text":"I really enjoy this channel.","label":false,"split":"train","category":"podcast","synthetic":true}
+{"segment_id":"synthetic-a-2","video_id":"synthetic-a","start":10,"end":20,"text":"The study reports that participation increased by 25 percent.","label":true,"split":"train","category":"podcast","synthetic":true}
+{"segment_id":"synthetic-b-1","video_id":"synthetic-b","start":0,"end":10,"text":"Researchers found that this treatment reduces recovery time by 20 percent.","label":true,"split":"dev","category":"lecture","synthetic":true}
+{"segment_id":"synthetic-b-2","video_id":"synthetic-b","start":10,"end":20,"text":"Please subscribe and tell me your favorite color.","label":false,"split":"dev","category":"lecture","synthetic":true}
+{"segment_id":"synthetic-b-3","video_id":"synthetic-b","start":20,"end":30,"text":"Water expands when it freezes.","label":true,"split":"dev","category":"lecture","synthetic":true}
+{"segment_id":"synthetic-b-4","video_id":"synthetic-b","start":30,"end":40,"text":"My favorite movie came out in 1999.","label":false,"split":"dev","category":"lecture","synthetic":true}
+{"segment_id":"synthetic-c-1","video_id":"synthetic-c","start":0,"end":10,"text":"The city opened its first railway in 1890.","label":true,"split":"test","category":"interview","synthetic":true}
+{"segment_id":"synthetic-c-2","video_id":"synthetic-c","start":10,"end":20,"text":"What do you think of the study?","label":false,"split":"test","category":"interview","synthetic":true}

@@ -1,0 +1,20 @@
+[
+  {
+    "title":"Lecture 1: The geometry of linear equations",
+    "speaker":"Gilbert Strang",
+    "subject":"linear algebra",
+    "page":"https://ocw.mit.edu/courses/18-06-linear-algebra-spring-2010/resources/lecture-1-the-geometry-of-linear-equations/"
+  },
+  {
+    "title":"Lecture 2: Science and Research",
+    "speaker":"John Gabrieli",
+    "subject":"psychology",
+    "page":"https://ocw.mit.edu/courses/9-00sc-introduction-to-psychology-fall-2011/resources/lecture-2-science-and-research/"
+  },
+  {
+    "title":"Lecture 2: Chemical Bonding and Molecular Interactions; Lipids and Membranes",
+    "speaker":"Barbara Imperiali",
+    "subject":"biology",
+    "page":"https://ocw.mit.edu/courses/7-016-introductory-biology-fall-2018/resources/lecture-2-chemical-bonding-and-molecular-interactions-lipids-and-membranes/"
+  }
+]

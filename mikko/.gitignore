@@ -1,0 +1,11 @@
+.venv/
+__pycache__/
+*.egg-info/
+data/raw/
+data/labeled/
+data/prepared/
+experiments/runs/
+
+experiments/*.json
+experiments/*.jsonl
+.DS_Store
