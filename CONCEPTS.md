@@ -80,7 +80,7 @@ The same material gets renamed at each stage. Most early confusion traces to thi
 | Cited in a note | **source** | `Paris Agreement / Effectiveness` + revision ID |
 
 "Reference material", "evidence corpus", "sources" and "passages" all name the same thing at
-different points in the pipeline. Our corpus today: **7 articles → 458 passages**, 324K on disk.
+different points in the pipeline. Our corpus today: **138 articles → 9,484 passages**, 7.0M on disk.
 
 A **passage is not live web data.** It was downloaded once, in advance. At query time nothing
 touches the network.
@@ -255,7 +255,7 @@ his real detector later with no rewrite (**D-02**).
 
 ### The problem
 
-We have a claim and 458 passages. Which passages are relevant?
+We have a claim and 9,484 passages. Which passages are relevant?
 
 The obvious approach — **match words** — fails immediately:
 
@@ -319,11 +319,11 @@ Row 3 shows it is not merely counting shared vocabulary — nuclear reactors sha
 
 **Indexing = embed everything in advance and save the result.**
 
-Embedding is slow-ish. Re-embedding 458 passages on every query would make each search take
+Embedding is slow-ish. Re-embedding 9,484 passages on every query would make each search take
 seconds. So it happens **once**:
 
 ```
-458 passages ──embed──▶ a 458 × 384 matrix ──save──▶ data/index/vectors.npy
+9,484 passages ──embed──▶ a 9,484 × 384 matrix ──save──▶ data/index/vectors.npy
 ```
 
 At query time we embed only the claim — **one** vector — and compare it against the stored
@@ -352,7 +352,7 @@ search *with* it. Only the things we want to find get indexed.
 
 Both avoid recomputation, so the intuition is sound. But **a cache only helps on a repeat of
 an identical input.** Our index answers a question about claims it has never seen: *which of
-my 458 passages is nearest to this brand-new sentence?* A cache structurally cannot do that.
+my 9,484 passages is nearest to this brand-new sentence?* A cache structurally cannot do that.
 Enabling similarity search is the point; skipping recomputation is a side benefit.
 
 ---
@@ -464,7 +464,7 @@ top = np.argpartition(-scores, k - 1)[:k]
 top = top[np.argsort(-scores[top])]
 ```
 
-One matrix multiply: `(458 × 384) @ (384,)` → 458 scores. Sort, take top 5. Milliseconds.
+One matrix multiply: `(9,484 × 384) @ (384,)` → 9,484 scores. Sort, take top 5. Milliseconds.
 No query language, no model, and **deterministic** — which is why recall numbers will be
 stable run to run.
 
@@ -570,7 +570,8 @@ cosine similarity always has a top-k. Measured:
 | Claim | Corpus coverage | Top dense score |
 |---|---|---|
 | "the paris agreement was adopted in 2015" | covered | **0.657** |
-| "the roman empire fell in 476 ad" | absent | **0.166** (returns Chernobyl passages) |
+| "the roman empire fell in 476 ad" | **now covered** | **0.598** (finds *Roman Empire*) |
+| "my neighbour's dog is named mr biscuits" | genuinely absent | **0.311** (finds *Industrial Revolution*) |
 
 That is **expected behaviour, not a bug.** The corpus has nothing about Rome, so the nearest
 neighbours are merely the least-distant irrelevant things.
@@ -582,7 +583,7 @@ misdescribes what a creator said is worse than no note") makes abstention a **co
 requirement**, not a nicety. D-05's grounding check catches an ungrounded note after the
 fact; abstention prevents generating it.
 
-The separation is a factor of four, so a threshold is clearly viable — but it must come off
+The separation is about 2x, so a threshold is plausible but not obvious — but it must come off
 the **labeled eval set**, not from eyeballing two examples. A cutoff tuned on hand-picked
 examples is a number we cannot defend in the report. Tracked as **D-09**, deferred to step 4.
 
@@ -691,7 +692,7 @@ All taken from our own system, reproducible via `rag.cli`.
 | Encoder | `all-MiniLM-L6-v2`, 384 dims, 256-token limit |
 | Chunk target / overlap | 150 words / 35 words |
 | Chunk size in tokens | **190** (limit 256, headroom 66) |
-| Corpus | 7 articles → **458 passages**, 324K on disk |
+| Corpus | 7 articles → **9,484 passages**, 7.0M on disk |
 | Index | 1.1M (`vectors.npy` + `passages.jsonl`) |
 | Paris Agreement article | 38,148 chars · 7,477 tokens · 53 chunks |
 | Dense score, covered claim | **0.657 – 0.707** |

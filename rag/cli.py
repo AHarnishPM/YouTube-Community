@@ -295,13 +295,21 @@ def cmd_demo(args) -> None:
 
     # ---------------------------------------------------------------- 5
     head(5, "THE OPEN HOLE: NO ABSTENTION  (D-09)")
-    off = "the roman empire fell in 476 ad after the sack of ravenna"
+    # A claim nothing could support: the referent is private, so no corpus
+    # anywhere contains evidence. An off-topic-but-real subject (Roman history,
+    # say) is NOT the right test -- once the corpus covers it, retrieval
+    # correctly finds it, which measures coverage rather than abstention.
+    unsupportable = "my neighbour's dog is named mr biscuits and he is seven years old"
     cov = retrievers["dense"].retrieve(claim.text, 1)[0]
-    unc = retrievers["dense"].retrieve(off, 1)[0]
-    print(f"\n  covered claim    {cov.score:.3f}   {cov.passage.title}")
-    print(f"  uncovered claim  {unc.score:.3f}   {unc.passage.title}   <- irrelevant, still returned")
-    print(f"\n  Separation is {cov.score / unc.score:.1f}x, so a threshold is viable --")
-    print("  but it must come off the labeled eval set, not from two examples.")
+    unc = retrievers["dense"].retrieve(unsupportable, 1)[0]
+
+    print(f"\n  covered claim        {cov.score:.3f}   {cov.passage.title}")
+    print(f"  unsupportable claim  {unc.score:.3f}   {unc.passage.title}"
+          f"   <- irrelevant, still returned")
+    print(f"\n  Separation is only {cov.score / unc.score:.1f}x. On the first 7-article corpus")
+    print("  this looked like 4x -- an artifact of having almost no distractors.")
+    print("  So a threshold is plausible but NOT obvious, and it has to come off")
+    print("  the labelled eval set rather than from a couple of examples.")
     print("  Until then the generator would cite irrelevant evidence confidently.")
 
     # ---------------------------------------------------------------- 6

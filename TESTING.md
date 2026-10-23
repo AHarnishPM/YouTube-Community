@@ -156,18 +156,26 @@ Cosine similarity always has a top-k. Try it:
 ./.venv/bin/python -m rag.cli search "the roman empire fell in 476 ad" -k 3 --retriever dense
 ```
 
-You get three Chernobyl passages. That is **expected behaviour, not a bug** — the corpus
-holds nothing about Rome, so the nearest neighbours are merely the least-distant irrelevant
-things.
+Since the corpus expansion this claim now finds *Roman Empire* at **0.598** — real
+evidence, because the corpus covers Roman history. To see genuine no-evidence behaviour you
+need a claim nothing could support:
+
+```bash
+./.venv/bin/python -m rag.cli search "my neighbour's dog is named mr biscuits" -k 3 --retriever dense
+```
+
+That returns *Industrial Revolution* at **0.311**. **Expected behaviour, not a bug** —
+cosine similarity always has a top-k.
 
 What saves it is the score separation:
 
 | Claim | Corpus coverage | Top score |
 |---|---|---|
 | "the paris agreement was adopted in 2015" | covered | **0.657** |
-| "the roman empire fell in 476 ad" | absent | **0.166** |
+| "the roman empire fell in 476 ad" | **now covered** | **0.598** |
+| "my neighbour's dog is named mr biscuits" | genuinely absent | **0.311** |
 
-A factor of four. So a threshold is clearly viable — but **none is implemented yet**, and
+A factor of about two. So a threshold is plausible but not obvious — but **none is implemented yet**, and
 it must not be guessed. Picking the cutoff from the labelled eval set is the right way;
 picking it by eyeballing two examples is how you end up with a number you cannot defend in
 the report. The eval harness below is what makes that choice defensible.

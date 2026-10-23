@@ -1,11 +1,111 @@
 {
   "source": "en.wikipedia.org",
-  "fetched_count": 7,
+  "fetched_count": 138,
   "articles": [
+    {
+      "title": "Algorithmic bias",
+      "revision_id": 1381498975,
+      "url": "https://en.wikipedia.org/wiki/Algorithmic_bias"
+    },
+    {
+      "title": "Ancient Rome",
+      "revision_id": 1380363934,
+      "url": "https://en.wikipedia.org/wiki/Ancient_Rome"
+    },
+    {
+      "title": "Antarctica",
+      "revision_id": 1380299432,
+      "url": "https://en.wikipedia.org/wiki/Antarctica"
+    },
+    {
+      "title": "Antimicrobial resistance",
+      "revision_id": 1381612426,
+      "url": "https://en.wikipedia.org/wiki/Antimicrobial_resistance"
+    },
+    {
+      "title": "Apollo program",
+      "revision_id": 1378112034,
+      "url": "https://en.wikipedia.org/wiki/Apollo_program"
+    },
+    {
+      "title": "Artificial intelligence",
+      "revision_id": 1381545652,
+      "url": "https://en.wikipedia.org/wiki/Artificial_intelligence"
+    },
+    {
+      "title": "Asteroid impact avoidance",
+      "revision_id": 1375267382,
+      "url": "https://en.wikipedia.org/wiki/Asteroid_impact_avoidance"
+    },
+    {
+      "title": "Battery",
+      "revision_id": 1375102462,
+      "url": "https://en.wikipedia.org/wiki/Battery"
+    },
+    {
+      "title": "Big Bang",
+      "revision_id": 1380984666,
+      "url": "https://en.wikipedia.org/wiki/Big_Bang"
+    },
+    {
+      "title": "Bitcoin",
+      "revision_id": 1379427049,
+      "url": "https://en.wikipedia.org/wiki/Bitcoin"
+    },
+    {
+      "title": "Black Death",
+      "revision_id": 1377102371,
+      "url": "https://en.wikipedia.org/wiki/Black_Death"
+    },
+    {
+      "title": "Black hole",
+      "revision_id": 1379111441,
+      "url": "https://en.wikipedia.org/wiki/Black_hole"
+    },
+    {
+      "title": "Body mass index",
+      "revision_id": 1380737946,
+      "url": "https://en.wikipedia.org/wiki/Body_mass_index"
+    },
+    {
+      "title": "Byzantine Empire",
+      "revision_id": 1381596478,
+      "url": "https://en.wikipedia.org/wiki/Byzantine_Empire"
+    },
+    {
+      "title": "CRISPR",
+      "revision_id": 1376493355,
+      "url": "https://en.wikipedia.org/wiki/CRISPR"
+    },
+    {
+      "title": "Caffeine",
+      "revision_id": 1381213982,
+      "url": "https://en.wikipedia.org/wiki/Caffeine"
+    },
+    {
+      "title": "Cancer research",
+      "revision_id": 1378614479,
+      "url": "https://en.wikipedia.org/wiki/Cancer_research"
+    },
+    {
+      "title": "Carbon capture and storage",
+      "revision_id": 1381327989,
+      "url": "https://en.wikipedia.org/wiki/Carbon_capture_and_storage"
+    },
     {
       "title": "Carbon dioxide in the atmosphere of Earth",
       "revision_id": 1375796469,
       "url": "https://en.wikipedia.org/wiki/Carbon_dioxide_in_the_atmosphere_of_Earth"
+    },
+    {
+      "title": "Carbon tax",
+      "revision_id": 1373983926,
+      "url": "https://en.wikipedia.org/wiki/Carbon_tax"
+    },
+    {
+      "title": "Cardiovascular disease",
+      "revision_id": 1380577275,
+      "url": "https://en.wikipedia.org/wiki/Cardiovascular_disease"
     },
     {
       "title": "Chernobyl disaster",
@@ -13,9 +113,229 @@
       "url": "https://en.wikipedia.org/wiki/Chernobyl_disaster"
     },
     {
+      "title": "Cholesterol",
+      "revision_id": 1381255942,
+      "url": "https://en.wikipedia.org/wiki/Cholesterol"
+    },
+    {
+      "title": "Circadian rhythm",
+      "revision_id": 1381018845,
+      "url": "https://en.wikipedia.org/wiki/Circadian_rhythm"
+    },
+    {
       "title": "Climate change",
       "revision_id": 1377826917,
       "url": "https://en.wikipedia.org/wiki/Climate_change"
+    },
+    {
+      "title": "Coal",
+      "revision_id": 1373605559,
+      "url": "https://en.wikipedia.org/wiki/Coal"
+    },
+    {
+      "title": "Cognitive bias",
+      "revision_id": 1379095929,
+      "url": "https://en.wikipedia.org/wiki/Cognitive_bias"
+    },
+    {
+      "title": "Cold War",
+      "revision_id": 1381546396,
+      "url": "https://en.wikipedia.org/wiki/Cold_War"
+    },
+    {
+      "title": "Community Notes",
+      "revision_id": 1371047751,
+      "url": "https://en.wikipedia.org/wiki/Community_Notes"
+    },
+    {
+      "title": "Compound interest",
+      "revision_id": 1377563152,
+      "url": "https://en.wikipedia.org/wiki/Compound_interest"
+    },
+    {
+      "title": "Confirmation bias",
+      "revision_id": 1370294982,
+      "url": "https://en.wikipedia.org/wiki/Confirmation_bias"
+    },
+    {
+      "title": "Correlation does not imply causation",
+      "revision_id": 1371652483,
+      "url": "https://en.wikipedia.org/wiki/Correlation_does_not_imply_causation"
+    },
+    {
+      "title": "Creatine",
+      "revision_id": 1380492505,
+      "url": "https://en.wikipedia.org/wiki/Creatine"
+    },
+    {
+      "title": "Cryptocurrency",
+      "revision_id": 1379901443,
+      "url": "https://en.wikipedia.org/wiki/Cryptocurrency"
+    },
+    {
+      "title": "DNA",
+      "revision_id": 1379332306,
+      "url": "https://en.wikipedia.org/wiki/DNA"
+    },
+    {
+      "title": "Dark matter",
+      "revision_id": 1380661687,
+      "url": "https://en.wikipedia.org/wiki/Dark_matter"
+    },
+    {
+      "title": "Deforestation",
+      "revision_id": 1380129498,
+      "url": "https://en.wikipedia.org/wiki/Deforestation"
+    },
+    {
+      "title": "Depression (mood)",
+      "revision_id": 1381529628,
+      "url": "https://en.wikipedia.org/wiki/Depression_(mood)"
+    },
+    {
+      "title": "Disinformation",
+      "revision_id": 1381230082,
+      "url": "https://en.wikipedia.org/wiki/Disinformation"
+    },
+    {
+      "title": "Earthquake",
+      "revision_id": 1379800890,
+      "url": "https://en.wikipedia.org/wiki/Earthquake"
+    },
+    {
+      "title": "Electric vehicle",
+      "revision_id": 1380947969,
+      "url": "https://en.wikipedia.org/wiki/Electric_vehicle"
+    },
+    {
+      "title": "Encryption",
+      "revision_id": 1380143461,
+      "url": "https://en.wikipedia.org/wiki/Encryption"
+    },
+    {
+      "title": "Energy storage",
+      "revision_id": 1380503638,
+      "url": "https://en.wikipedia.org/wiki/Energy_storage"
+    },
+    {
+      "title": "Evolution",
+      "revision_id": 1381515403,
+      "url": "https://en.wikipedia.org/wiki/Evolution"
+    },
+    {
+      "title": "Exercise",
+      "revision_id": 1381503523,
+      "url": "https://en.wikipedia.org/wiki/Exercise"
+    },
+    {
+      "title": "Exoplanet",
+      "revision_id": 1381126123,
+      "url": "https://en.wikipedia.org/wiki/Exoplanet"
+    },
+    {
+      "title": "Fact-checking",
+      "revision_id": 1381370186,
+      "url": "https://en.wikipedia.org/wiki/Fact-checking"
+    },
+    {
+      "title": "Fall of the Western Roman Empire",
+      "revision_id": 1381400408,
+      "url": "https://en.wikipedia.org/wiki/Fall_of_the_Western_Roman_Empire"
+    },
+    {
+      "title": "Federal Reserve",
+      "revision_id": 1381271325,
+      "url": "https://en.wikipedia.org/wiki/Federal_Reserve"
+    },
+    {
+      "title": "Filter bubble",
+      "revision_id": 1379318998,
+      "url": "https://en.wikipedia.org/wiki/Filter_bubble"
+    },
+    {
+      "title": "Fossil fuel",
+      "revision_id": 1375708304,
+      "url": "https://en.wikipedia.org/wiki/Fossil_fuel"
+    },
+    {
+      "title": "French Revolution",
+      "revision_id": 1381371714,
+      "url": "https://en.wikipedia.org/wiki/French_Revolution"
+    },
+    {
+      "title": "Fukushima nuclear accident",
+      "revision_id": 1381346039,
+      "url": "https://en.wikipedia.org/wiki/Fukushima_nuclear_accident"
+    },
+    {
+      "title": "General relativity",
+      "revision_id": 1380898628,
+      "url": "https://en.wikipedia.org/wiki/General_relativity"
+    },
+    {
+      "title": "Gini coefficient",
+      "revision_id": 1379825442,
+      "url": "https://en.wikipedia.org/wiki/Gini_coefficient"
+    },
+    {
+      "title": "Global warming potential",
+      "revision_id": 1377775220,
+      "url": "https://en.wikipedia.org/wiki/Global_warming_potential"
+    },
+    {
+      "title": "Great Depression",
+      "revision_id": 1381181407,
+      "url": "https://en.wikipedia.org/wiki/Great_Depression"
+    },
+    {
+      "title": "Greenhouse gas",
+      "revision_id": 1369775188,
+      "url": "https://en.wikipedia.org/wiki/Greenhouse_gas"
+    },
+    {
+      "title": "Grid energy storage",
+      "revision_id": 1380987274,
+      "url": "https://en.wikipedia.org/wiki/Grid_energy_storage"
+    },
+    {
+      "title": "Gross domestic product",
+      "revision_id": 1381571432,
+      "url": "https://en.wikipedia.org/wiki/Gross_domestic_product"
+    },
+    {
+      "title": "Human genome",
+      "revision_id": 1378672751,
+      "url": "https://en.wikipedia.org/wiki/Human_genome"
+    },
+    {
+      "title": "Hydroelectricity",
+      "revision_id": 1381030243,
+      "url": "https://en.wikipedia.org/wiki/Hydroelectricity"
+    },
+    {
+      "title": "Income distribution",
+      "revision_id": 1379366714,
+      "url": "https://en.wikipedia.org/wiki/Income_distribution"
+    },
+    {
+      "title": "Industrial Revolution",
+      "revision_id": 1381202308,
+      "url": "https://en.wikipedia.org/wiki/Industrial_Revolution"
+    },
+    {
+      "title": "Inflation",
+      "revision_id": 1380085884,
+      "url": "https://en.wikipedia.org/wiki/Inflation"
+    },
+    {
+      "title": "Intergovernmental Panel on Climate Change",
+      "revision_id": 1378626534,
+      "url": "https://en.wikipedia.org/wiki/Intergovernmental_Panel_on_Climate_Change"
+    },
+    {
+      "title": "Intermittent fasting",
+      "revision_id": 1375033367,
+      "url": "https://en.wikipedia.org/wiki/Intermittent_fasting"
     },
     {
       "title": "International Energy Agency",
@@ -23,19 +343,354 @@
       "url": "https://en.wikipedia.org/wiki/International_Energy_Agency"
     },
     {
+      "title": "Internet",
+      "revision_id": 1381320565,
+      "url": "https://en.wikipedia.org/wiki/Internet"
+    },
+    {
+      "title": "Ketogenic diet",
+      "revision_id": 1372793940,
+      "url": "https://en.wikipedia.org/wiki/Ketogenic_diet"
+    },
+    {
+      "title": "Kyoto Protocol",
+      "revision_id": 1374600856,
+      "url": "https://en.wikipedia.org/wiki/Kyoto_Protocol"
+    },
+    {
+      "title": "Large language model",
+      "revision_id": 1381397428,
+      "url": "https://en.wikipedia.org/wiki/Large_language_model"
+    },
+    {
+      "title": "Levelized cost of electricity",
+      "revision_id": 1380428075,
+      "url": "https://en.wikipedia.org/wiki/Levelized_cost_of_electricity"
+    },
+    {
+      "title": "Library of Alexandria",
+      "revision_id": 1381278398,
+      "url": "https://en.wikipedia.org/wiki/Library_of_Alexandria"
+    },
+    {
+      "title": "Lithium",
+      "revision_id": 1381202909,
+      "url": "https://en.wikipedia.org/wiki/Lithium"
+    },
+    {
+      "title": "MMR vaccine and autism",
+      "revision_id": 1366528721,
+      "url": "https://en.wikipedia.org/wiki/MMR_vaccine_and_autism"
+    },
+    {
+      "title": "Machine learning",
+      "revision_id": 1381578119,
+      "url": "https://en.wikipedia.org/wiki/Machine_learning"
+    },
+    {
+      "title": "Mars",
+      "revision_id": 1379497097,
+      "url": "https://en.wikipedia.org/wiki/Mars"
+    },
+    {
+      "title": "Media bias",
+      "revision_id": 1378817964,
+      "url": "https://en.wikipedia.org/wiki/Media_bias"
+    },
+    {
+      "title": "Mediterranean diet",
+      "revision_id": 1374462204,
+      "url": "https://en.wikipedia.org/wiki/Mediterranean_diet"
+    },
+    {
+      "title": "Mental health",
+      "revision_id": 1381047116,
+      "url": "https://en.wikipedia.org/wiki/Mental_health"
+    },
+    {
+      "title": "Microbiome",
+      "revision_id": 1380567312,
+      "url": "https://en.wikipedia.org/wiki/Microbiome"
+    },
+    {
+      "title": "Minimum wage",
+      "revision_id": 1380696896,
+      "url": "https://en.wikipedia.org/wiki/Minimum_wage"
+    },
+    {
+      "title": "Misinformation",
+      "revision_id": 1380521594,
+      "url": "https://en.wikipedia.org/wiki/Misinformation"
+    },
+    {
+      "title": "Moon landing conspiracy theories",
+      "revision_id": 1376743700,
+      "url": "https://en.wikipedia.org/wiki/Moon_landing_conspiracy_theories"
+    },
+    {
+      "title": "Moore's law",
+      "revision_id": 1378571502,
+      "url": "https://en.wikipedia.org/wiki/Moore's_law"
+    },
+    {
+      "title": "Natural gas",
+      "revision_id": 1380371206,
+      "url": "https://en.wikipedia.org/wiki/Natural_gas"
+    },
+    {
+      "title": "Natural selection",
+      "revision_id": 1381515893,
+      "url": "https://en.wikipedia.org/wiki/Natural_selection"
+    },
+    {
+      "title": "Neural network",
+      "revision_id": 1379881969,
+      "url": "https://en.wikipedia.org/wiki/Neural_network"
+    },
+    {
+      "title": "Nuclear fusion",
+      "revision_id": 1380971291,
+      "url": "https://en.wikipedia.org/wiki/Nuclear_fusion"
+    },
+    {
       "title": "Nuclear power",
       "revision_id": 1377638624,
       "url": "https://en.wikipedia.org/wiki/Nuclear_power"
     },
     {
+      "title": "Obesity",
+      "revision_id": 1380140022,
+      "url": "https://en.wikipedia.org/wiki/Obesity"
+    },
+    {
+      "title": "Ocean acidification",
+      "revision_id": 1372947827,
+      "url": "https://en.wikipedia.org/wiki/Ocean_acidification"
+    },
+    {
+      "title": "Ottoman Empire",
+      "revision_id": 1380557792,
+      "url": "https://en.wikipedia.org/wiki/Ottoman_Empire"
+    },
+    {
+      "title": "Ozone depletion",
+      "revision_id": 1379959077,
+      "url": "https://en.wikipedia.org/wiki/Ozone_depletion"
+    },
+    {
+      "title": "P-value",
+      "revision_id": 1378624770,
+      "url": "https://en.wikipedia.org/wiki/P-value"
+    },
+    {
       "title": "Paris Agreement",
-      "revision_id": 1378148547,
+      "revision_id": 1381559793,
       "url": "https://en.wikipedia.org/wiki/Paris_Agreement"
+    },
+    {
+      "title": "Peer review",
+      "revision_id": 1380796962,
+      "url": "https://en.wikipedia.org/wiki/Peer_review"
+    },
+    {
+      "title": "Photovoltaics",
+      "revision_id": 1375390180,
+      "url": "https://en.wikipedia.org/wiki/Photovoltaics"
+    },
+    {
+      "title": "Placebo",
+      "revision_id": 1376281766,
+      "url": "https://en.wikipedia.org/wiki/Placebo"
+    },
+    {
+      "title": "Plate tectonics",
+      "revision_id": 1376119468,
+      "url": "https://en.wikipedia.org/wiki/Plate_tectonics"
+    },
+    {
+      "title": "Podcast",
+      "revision_id": 1380999021,
+      "url": "https://en.wikipedia.org/wiki/Podcast"
+    },
+    {
+      "title": "Printing press",
+      "revision_id": 1379445153,
+      "url": "https://en.wikipedia.org/wiki/Printing_press"
+    },
+    {
+      "title": "Quantum computing",
+      "revision_id": 1381159169,
+      "url": "https://en.wikipedia.org/wiki/Quantum_computing"
+    },
+    {
+      "title": "Quantum mechanics",
+      "revision_id": 1380701615,
+      "url": "https://en.wikipedia.org/wiki/Quantum_mechanics"
+    },
+    {
+      "title": "Randomized controlled trial",
+      "revision_id": 1350325633,
+      "url": "https://en.wikipedia.org/wiki/Randomized_controlled_trial"
+    },
+    {
+      "title": "Rare-earth element",
+      "revision_id": 1379412125,
+      "url": "https://en.wikipedia.org/wiki/Rare-earth_element"
+    },
+    {
+      "title": "Renaissance",
+      "revision_id": 1381289358,
+      "url": "https://en.wikipedia.org/wiki/Renaissance"
+    },
+    {
+      "title": "Renewable energy",
+      "revision_id": 1380061620,
+      "url": "https://en.wikipedia.org/wiki/Renewable_energy"
+    },
+    {
+      "title": "Replication crisis",
+      "revision_id": 1381275454,
+      "url": "https://en.wikipedia.org/wiki/Replication_crisis"
+    },
+    {
+      "title": "Roman Empire",
+      "revision_id": 1380363985,
+      "url": "https://en.wikipedia.org/wiki/Roman_Empire"
+    },
+    {
+      "title": "Sampling bias",
+      "revision_id": 1375044021,
+      "url": "https://en.wikipedia.org/wiki/Sampling_bias"
+    },
+    {
+      "title": "Saturated fat",
+      "revision_id": 1375111814,
+      "url": "https://en.wikipedia.org/wiki/Saturated_fat"
+    },
+    {
+      "title": "Scientific consensus",
+      "revision_id": 1330333272,
+      "url": "https://en.wikipedia.org/wiki/Scientific_consensus"
+    },
+    {
+      "title": "Sea level rise",
+      "revision_id": 1381350573,
+      "url": "https://en.wikipedia.org/wiki/Sea_level_rise"
+    },
+    {
+      "title": "Self-driving car",
+      "revision_id": 1380212490,
+      "url": "https://en.wikipedia.org/wiki/Self-driving_car"
+    },
+    {
+      "title": "Semiconductor",
+      "revision_id": 1380042956,
+      "url": "https://en.wikipedia.org/wiki/Semiconductor"
+    },
+    {
+      "title": "Silk Road",
+      "revision_id": 1379074984,
+      "url": "https://en.wikipedia.org/wiki/Silk_Road"
+    },
+    {
+      "title": "Sleep deprivation",
+      "revision_id": 1380296915,
+      "url": "https://en.wikipedia.org/wiki/Sleep_deprivation"
+    },
+    {
+      "title": "Social media",
+      "revision_id": 1381084809,
+      "url": "https://en.wikipedia.org/wiki/Social_media"
     },
     {
       "title": "Solar power",
       "revision_id": 1380558907,
       "url": "https://en.wikipedia.org/wiki/Solar_power"
+    },
+    {
+      "title": "Space Race",
+      "revision_id": 1379999198,
+      "url": "https://en.wikipedia.org/wiki/Space_Race"
+    },
+    {
+      "title": "Speed of light",
+      "revision_id": 1381043372,
+      "url": "https://en.wikipedia.org/wiki/Speed_of_light"
+    },
+    {
+      "title": "Statin",
+      "revision_id": 1378637927,
+      "url": "https://en.wikipedia.org/wiki/Statin"
+    },
+    {
+      "title": "Statistical significance",
+      "revision_id": 1380706104,
+      "url": "https://en.wikipedia.org/wiki/Statistical_significance"
+    },
+    {
+      "title": "Sugar",
+      "revision_id": 1381344580,
+      "url": "https://en.wikipedia.org/wiki/Sugar"
+    },
+    {
+      "title": "Supply and demand",
+      "revision_id": 1378800284,
+      "url": "https://en.wikipedia.org/wiki/Supply_and_demand"
+    },
+    {
+      "title": "Survivorship bias",
+      "revision_id": 1379606971,
+      "url": "https://en.wikipedia.org/wiki/Survivorship_bias"
+    },
+    {
+      "title": "Three Mile Island accident",
+      "revision_id": 1379701996,
+      "url": "https://en.wikipedia.org/wiki/Three_Mile_Island_accident"
+    },
+    {
+      "title": "Type 2 diabetes",
+      "revision_id": 1375527475,
+      "url": "https://en.wikipedia.org/wiki/Type_2_diabetes"
+    },
+    {
+      "title": "Unemployment",
+      "revision_id": 1378359167,
+      "url": "https://en.wikipedia.org/wiki/Unemployment"
+    },
+    {
+      "title": "Universal basic income",
+      "revision_id": 1379934775,
+      "url": "https://en.wikipedia.org/wiki/Universal_basic_income"
+    },
+    {
+      "title": "Vaccine hesitancy",
+      "revision_id": 1380653854,
+      "url": "https://en.wikipedia.org/wiki/Vaccine_hesitancy"
+    },
+    {
+      "title": "Vitamin D",
+      "revision_id": 1378586374,
+      "url": "https://en.wikipedia.org/wiki/Vitamin_D"
+    },
+    {
+      "title": "Volcano",
+      "revision_id": 1380352685,
+      "url": "https://en.wikipedia.org/wiki/Volcano"
+    },
+    {
+      "title": "Wind power",
+      "revision_id": 1377654224,
+      "url": "https://en.wikipedia.org/wiki/Wind_power"
+    },
+    {
+      "title": "World War II",
+      "revision_id": 1381604228,
+      "url": "https://en.wikipedia.org/wiki/World_War_II"
+    },
+    {
+      "title": "YouTube",
+      "revision_id": 1381324897,
+      "url": "https://en.wikipedia.org/wiki/YouTube"
     }
   ]
 }

@@ -135,7 +135,7 @@ fetch records the article's **revision ID**, and that is what a `Source` carries
 > `BUGS.md` (Bug 1).
 >
 > **What changed:** the corpus text is now the reproducible artifact and is **committed**
-> (324K). `build --pinned` reuses it rather than re-fetching. The manifest's job narrowed
+> (7.0M). `build --pinned` reuses it rather than re-fetching. The manifest's job narrowed
 > from *regenerate* to *detect drift*, via `check_drift()` and the `drift` command. The
 > `revision_id` parameter was removed from `fetch_article` entirely — a parameter that
 > silently returns a different content format is worse than no parameter.
@@ -197,12 +197,16 @@ passed through whole. Chunking now windows *within* a section.
 **Decided:** neither, for now — an exact dot product over an in-memory NumPy matrix, behind
 the `VectorStore` interface from D-02.
 
-**Why:** at our scale (7 articles already give 458 passages; a few hundred articles give
+**Why:** at our scale (7 articles already give 9,484 passages; a few hundred articles give
 order 10k) an exact search over a 10k×384 matrix takes milliseconds. FAISS would add a
 dependency and an *approximation* to buy speed we do not need. That approximation matters
 here specifically because the quantity under measurement **is** retrieval quality: with an
 exact index, a disappointing recall@k is the retriever's fault and not the index's. Swap in
 FAISS or pgvector if the corpus grows enough to need it.
+
+**Re-checked 2026-10-23 after a 20× corpus expansion** (457 → 9,484 passages): query time
+4.4 ms, index load 0.07 s, BM25 build 0.24 s. The decision holds comfortably; revisit around
+100k passages.
 
 ### D-08 · Hybrid retrieval by reciprocal rank fusion · `DECIDED` (2026-10-22)
 
@@ -211,12 +215,18 @@ Follows from D-03: having built dense and BM25, combining them is nearly free. R
 unbounded scale — no weighting hyperparameter to tune, so no risk that the fusion's apparent
 advantage is really a tuned constant. `rrf_k = 60`, the value from the original paper.
 
-**Second observation, 2026-10-23 — a ranking miss found by hand.** On the claim "solar is
-the cheapest way to make electricity", dense returns *Solar power / Productivity by
-location* (irradiance, latitude, temperature) at rank 1 with 0.6572, and *Solar power /
-Cost per watt* — which contains "solar power is the lowest cost source of electricity" —
-at rank 2 with 0.6541. **A margin of 0.003 separates the right answer from a wrong one,**
-and all three retrievers order them the same way.
+**Second observation, 2026-10-23 — a ranking miss found by hand, which the corpus expansion
+made worse.** On the claim "solar is the cheapest way to make electricity":
+
+| rank | score | passage | addresses cost? |
+|---|---|---|---|
+| 1 | 0.6580 | *Renewable energy* / lead | no — defines "renewable" |
+| 2 | 0.6572 | *Solar power* / Productivity by location | no — irradiance, latitude |
+| 3 | **0.6541** | *Solar power* / **Cost per watt** | **yes** — "solar power is the lowest cost source of electricity" |
+
+The passage that answers the claim is **rank 3**, behind two irrelevant ones, with all three
+inside **0.004**. At 7 articles it was rank 2; adding *Renewable energy* to the corpus pushed
+it down one more.
 
 Two things follow. First, top-1 accuracy is weaker than the headline scores suggest, and
 score magnitude says little about ordering quality at these margins. Second, this is
@@ -231,32 +241,54 @@ ordering is wrong. It is the concrete argument for nDCG and precision@1 alongsid
 the dense-vs-lexical contrast D-03 was added to quantify. It needs the labeled eval set
 (step 3) before it counts as evidence.
 
-### D-09 · Retrieval has no abstention; a threshold must be learned, not guessed · `OPEN`
+### D-09 · Retrieval has no abstention; the threshold is harder than it first looked · `OPEN`
 
 **Proposal:** silent on this. It describes retrieving evidence and generating a grounded
-note, but never addresses the case where the corpus holds no relevant evidence at all.
+note, but never addresses the case where the corpus holds no relevant evidence.
 
-**The behaviour today:** retrieval always returns `k` passages, because cosine similarity
-always has a top-k. Asked about a claim the corpus cannot support, it returns the
-least-distant irrelevant passages:
+**The behaviour:** retrieval always returns `k` passages, because cosine similarity always
+has a top-k. Asked about a claim the corpus cannot support, it returns the least-distant
+irrelevant passages.
 
-| Claim | Corpus coverage | Top dense score |
-|---|---|---|
-| "the paris agreement was adopted in 2015" | covered | **0.657** |
-| "the roman empire fell in 476 ad" | absent | **0.166** (returns Chernobyl passages) |
+> ### ⚠️ Corrected 2026-10-23 — the 4× separation was an artifact of a 7-article corpus
+>
+> This entry originally reported a clean split and concluded "a threshold is clearly viable":
+>
+> | Claim | 7-article corpus | 138-article corpus |
+> |---|---|---|
+> | "the paris agreement was adopted in 2015" | 0.657 | **0.657** |
+> | "the roman empire fell in 476 ad" | 0.166 *(Chernobyl)* | **0.598** *(Roman Empire)* |
+> | "my neighbour's dog is named mr biscuits" | — | **0.311** *(Industrial Revolution)* |
+>
+> Two things changed. The Roman Empire claim now finds **real evidence** at 0.598, because
+> the corpus actually contains Roman history — so that example was never measuring
+> abstention, it was measuring a coverage gap. And the honest uncovered case (a claim about
+> a private referent, which no corpus can support) scores **0.311**, not 0.166.
+>
+> **The separation collapsed from 4.1× to 2.1×.** The original figure was an artifact of a
+> tiny corpus: with only 7 topically-adjacent articles, irrelevant content was very far
+> away in embedding space. With 138 articles spanning several domains there is always
+> something *vaguely* near, so the floor rises.
 
-**Why it matters more than it looks:** this is the difference between a note that adds
-context and a note that staples Chernobyl passages to a claim about Rome. The proposal's
-own framing — "a note that confidently misdescribes what a creator said is worse than no
-note" — makes abstention a correctness requirement, not a nicety. D-05's grounding check
-catches an ungrounded note after the fact; abstention prevents generating it.
+**What this means for the design.** Abstention is harder than the first measurement
+suggested. A single global cutoff now has to separate ~0.60 (relevant) from ~0.31
+(irrelevant), and across many claims those bands will overlap — a threshold that abstains
+correctly on one claim will wrongly abstain on another. Options to weigh once labels exist:
 
-**The separation is a factor of four, so a threshold is clearly viable.** But the cutoff
-must be chosen on the labeled eval set from step 3, not by eyeballing two examples. A
-threshold tuned on examples we picked is a number we cannot defend in the report.
+- a global threshold, accepting a measured error rate in both directions;
+- a *relative* signal — the gap between the top hit and the k-th, which is scale-free;
+- requiring agreement between dense and BM25, since a passage with zero lexical overlap and
+  merely-near embedding is a weaker bet;
+- letting the generator abstain from the evidence it is shown, rather than deciding earlier.
 
-**Deferred until step 4** — it needs the same labeled data, and choosing it earlier means
-choosing it badly. Documented for users in `TESTING.md`.
+**Why it still matters more than it looks:** feed 0.31-scoring passages to the generator and
+it will write a grounded-*looking* note citing irrelevant evidence. The proposal's own
+framing — "a note that confidently misdescribes what a creator said is worse than no note" —
+makes abstention a correctness requirement. D-05's grounding check catches an ungrounded
+note after the fact; abstention prevents generating it.
+
+**Deferred until step 4** — it needs the labelled data, and choosing earlier means choosing
+badly, as the 4× figure demonstrates. Documented for users in `TESTING.md`.
 
 ### D-10 · Retrieval eval uses pooled, passage-level relevance judgements · `DECIDED` (2026-10-23)
 
@@ -266,7 +298,7 @@ granularity, or how the judging is made tractable.
 
 **Decided:** **pooled passage-level** judging, the standard TREC method.
 
-**Why pooling.** Judging all 457 passages against each of ~50 claims is 22,850 decisions.
+**Why pooling.** Judging all 9,484 passages against each of ~50 claims is 22,850 decisions.
 Instead, run every retriever, take the union of their top-N, and judge only that pool —
 about 16 passages per claim at depth 10. Hours of work, not weeks.
 
@@ -298,6 +330,38 @@ pool no longer matches the corpus.
 once labels exist and answer different questions (noise, reader effort, rank quality).
 Metrics live in `rag/eval/metrics.py` with 14 dedicated tests, because a wrong metric
 silently invalidates every number downstream.
+
+### D-11 · Corpus expanded to 138 articles, with deliberate distractors · `DECIDED` (2026-10-23)
+
+**Proposal:** "a fixed corpus of publicly available reference material." No size given.
+
+**Decided:** 138 pinned Wikipedia articles → **9,484 passages** (7.0M committed), spanning
+climate and energy, health and nutrition, history, physics and space, economics and
+statistics, technology, and media/information. Seed list at `data/corpus/titles.txt`.
+
+**Why expand before labelling, not after.** The first corpus was 7 topically-adjacent
+articles chosen to cover the fixture claims — a corpus of nothing but correct answers. Three
+problems with evaluating against it:
+
+1. **No distractors.** Almost any climate claim found the right article because there were
+   barely any wrong ones. Retrieval looked better than it was.
+2. **Labels are judged against a pool drawn from the corpus** (D-10). Labelling at 7 articles
+   and expanding afterwards means the new articles were never pooled, so the judgements would
+   have to be redone. Expanding first means judging once.
+3. **The proposal promises coverage of claims from "podcasts, lectures, interviews, reviews
+   and tutorials"** — which is not a climate corpus.
+
+**It made retrieval measurably harder, which is the point.** On the provisional labels,
+precision@1 fell from 1.000 to 0.750 and MRR from 1.000 to 0.833 — the metrics stopped being
+degenerate and started discriminating. Hybrid now leads dense and BM25 at k=3 and k=10
+(nDCG@3 0.824 vs 0.676), the first sign of the D-03/D-08 comparison producing signal. Still
+provisional labels, so not a result.
+
+**It also invalidated the D-09 abstention figure** — see the correction there. A finding that
+only appeared because the corpus grew, and the clearest argument for having grown it.
+
+**Cost:** 89 s to build end to end (138 fetches, chunking, embedding). 7.0M of committed
+text, up from 324K. Query time unaffected at 4.4 ms (D-07).
 
 ---
 
@@ -404,10 +468,11 @@ measured result rather than an intention.
 |---|---|
 | 2026-10-22 | Branch `kenza/rag-core` created off `main`. Design log opened, build plan drafted. |
 | 2026-10-22 | **Steps 0–2 done.** Interface contracts as typed models (`rag/models.py`); hand-written upstream fixtures; Wikipedia fetcher with revision pinning; section-aware chunker; embedding layer with token-budget check; exact vector store with persistence; dense + BM25 + hybrid retrievers. 11 tests passing. |
-| 2026-10-22 | End-to-end smoke test: 7 articles → 458 passages → all three retrievers return plausibly relevant evidence for all four fixture claims. Index persisted to `data/index/`. **Not a result** — no labeled eval set yet. |
+| 2026-10-22 | End-to-end smoke test: 7 articles → 9,484 passages → all three retrievers return plausibly relevant evidence for all four fixture claims. Index persisted to `data/index/`. **Not a result** — no labeled eval set yet. |
 | 2026-10-23 | **Bug hunt: 5 bugs found and fixed**, documented with repro steps in `BUGS.md`. One (Bug 1) invalidated the D-04 pinning mechanism, now corrected above. Tests 11 → 20. Corpus 458 → 457 passages (Bug 2 was indexing a leaked bibliography section). Added `drift` and `demo` commands. |
 | 2026-10-23 | `CONCEPTS.md` written — concepts, measured numbers, and clarifications C-1…C-8. |
 | 2026-10-23 | **Step 4 harness built** (not yet a result): `rag/eval/` with pooled passage-level labelling, recall@k / precision@k / MRR / nDCG@k, and `pool` / `label` / `eval` commands. Methodology logged as D-10. Two more bugs found and fixed (BUGS.md 6–7). Tests 20 → 48. |
+| 2026-10-23 | **Corpus expanded 7 → 138 articles** (457 → 9,484 passages), with deliberate distractors. Logged as D-11. Made retrieval measurably harder (precision@1 1.000 → 0.750 on provisional labels) and **invalidated the D-09 abstention figure** — the 4x separation was an artifact of a tiny corpus; it is 2.2x on a realistic one. D-07 re-checked: 4.4 ms per query, decision holds. |
 | 2026-10-23 | Audited teammates' work: Aaron pushed transcript ingestion today — **Firebase, not PostgreSQL**, which invalidates the D-02 pgvector target. Nothing from Member 2 in the repo. See the answer in the status notes. |
 
 ### Done

@@ -77,6 +77,18 @@
           "relevant": true
         },
         {
+          "key": "8291517acc40",
+          "title": "Intergovernmental Panel on Climate Change",
+          "section": "Special reports 2018–2019",
+          "snippet": "During the sixth assessment cycle, the IPCC produced three special reports. This made it the most ambitious cycle in IPCC history. The UNFCCC set a goal of keeping global warming well below 2 °C (36 °F) while trying to hold it at 1.5 °C (34",
+          "retrievers": [
+            "dense",
+            "bm25",
+            "hybrid"
+          ],
+          "relevant": false
+        },
+        {
           "key": "f45ed4f59d0e",
           "title": "Paris Agreement",
           "section": null,
@@ -110,27 +122,6 @@
           "relevant": true
         },
         {
-          "key": "02f15e28f012",
-          "title": "Paris Agreement",
-          "section": "Fulfillment of requirements",
-          "snippet": "In September 2021, the Climate Action Tracker estimated that, with current policies, global emissions will double above the 2030 target level. The gap is 20–23 Gt CO2e. Countries such as Iran, Russia, Saudi Arabia, Singapore, and Thailand h",
-          "retrievers": [
-            "dense"
-          ],
-          "relevant": true
-        },
-        {
-          "key": "ee3ea9b00843",
-          "title": "Paris Agreement",
-          "section": "Aims",
-          "snippet": "The aim of the agreement, as described in Article 2, is to have a stronger response to the danger of climate change; it seeks to enhance the implementation of the United Nations Framework Convention on Climate Change through: (a) Holding th",
-          "retrievers": [
-            "bm25",
-            "hybrid"
-          ],
-          "relevant": true
-        },
-        {
           "key": "fd76e286c64d",
           "title": "Paris Agreement",
           "section": "Effectiveness",
@@ -142,35 +133,44 @@
           "relevant": true
         },
         {
+          "key": "57604dc11da0",
+          "title": "Kyoto Protocol",
+          "section": "Relation to temperature targets",
+          "snippet": "At the 16th Conference of the Parties held in 2010, Parties to the UNFCCC agreed that future global warming should be limited below 2°C relative to the pre-industrial temperature level. One of the stabilization levels discussed in relation ",
+          "retrievers": [
+            "bm25"
+          ],
+          "relevant": false
+        },
+        {
+          "key": "ee3ea9b00843",
+          "title": "Paris Agreement",
+          "section": "Aims",
+          "snippet": "The aim of the agreement, as described in Article 2, is to have a stronger response to the danger of climate change; it seeks to enhance the implementation of the United Nations Framework Convention on Climate Change through: (a) Holding th",
+          "retrievers": [
+            "bm25"
+          ],
+          "relevant": true
+        },
+        {
           "key": "f99d264c8b70",
           "title": "Paris Agreement",
           "section": "Precise methodology and status of goal",
           "snippet": "The Paris Agreement required countries to pursue efforts to \"limit the temperature increase to 1.5°C above pre-industrial levels\", but did not give a precise definition for the temperature increase. In a 2018 special report titled \"Global W",
           "retrievers": [
-            "bm25",
-            "hybrid"
+            "bm25"
           ],
           "relevant": true
         },
         {
-          "key": "9e313d6ec95d",
-          "title": "International Energy Agency",
-          "section": null,
-          "snippet": "from rising above 1.5 °C. All IEA member countries have signed the Paris Agreement which aims to limit warming to 1.5 °C, and two thirds of IEA member governments have made commitments to emission neutrality by 2050. (The United States has ",
+          "key": "31d9aa908607",
+          "title": "Paris Agreement",
+          "section": "Effectiveness",
+          "snippet": "In 2021, a study using a probabilistic model concluded that the rates of emissions reductions would have to increase by 80% beyond NDCs to likely meet the 2 °C upper target of the Paris Agreement, that the probabilities of major emitters me",
           "retrievers": [
-            "bm25"
+            "hybrid"
           ],
-          "relevant": false
-        },
-        {
-          "key": "02f887161bd2",
-          "title": "International Energy Agency",
-          "section": "Scenarios",
-          "snippet": "with up-to-date climate science, nor is it consistent with the Paris climate agreement that aspires to limit global warming to 1.5 degrees Celsius. In March 2017, the IEA (along with IRENA) published a report that considers a safer climate ",
-          "retrievers": [
-            "bm25"
-          ],
-          "relevant": false
+          "relevant": true
         }
       ]
     },
@@ -220,8 +220,28 @@
           "section": "Greenhouse gases",
           "snippet": "and are therefore considered to be external forcings that change global temperatures. Before the Industrial Revolution, naturally occurring amounts of greenhouse gases caused the air near the surface to be about 33 °C warmer than it would h",
           "retrievers": [
+            "dense"
+          ],
+          "relevant": false
+        },
+        {
+          "key": "8917857ce411",
+          "title": "Ocean acidification",
+          "section": "Cause",
+          "snippet": "In 2021, atmospheric carbon dioxide (CO2) levels of around 415 ppm were around 50% higher than preindustrial concentrations. According to the National Oceanic and Atmospheric Administration in 2023, atmospheric CO2 levels have risen from ap",
+          "retrievers": [
             "dense",
             "hybrid"
+          ],
+          "relevant": false
+        },
+        {
+          "key": "23f3f982253b",
+          "title": "Greenhouse gas",
+          "section": "Atmospheric lifetime",
+          "snippet": "of these variables can alter the atmospheric lifetime of a greenhouse gas. For instance, methane's atmospheric lifetime is estimated to have been lower in the 19th century than now, but to have been higher in the second half of the 20th cen",
+          "retrievers": [
+            "dense"
           ],
           "relevant": false
         },
@@ -246,6 +266,17 @@
           "relevant": true
         },
         {
+          "key": "0b1c101d19bb",
+          "title": "Greenhouse gas",
+          "section": null,
+          "snippet": "levels have varied widely in the more distant past. Carbon dioxide levels are now higher than they have been for three million years. The 2023 annual update of key indicators reveals that human-induced temperature rise, greenhouse gas conce",
+          "retrievers": [
+            "dense",
+            "hybrid"
+          ],
+          "relevant": false
+        },
+        {
           "key": "e589507ee821",
           "title": "Carbon dioxide in the atmosphere of Earth",
           "section": null,
@@ -257,48 +288,25 @@
           "relevant": true
         },
         {
-          "key": "c252929c08eb",
-          "title": "Carbon dioxide in the atmosphere of Earth",
-          "section": "Anthropogenic CO2 emissions",
-          "snippet": "CO2 (9 billion tonnes carbon) each year. This larger disruption to the natural balance is responsible for recent growth in the atmospheric CO2 concentration. Currently about half of the carbon dioxide released from the burning of fossil fue",
-          "retrievers": [
-            "dense"
-          ],
-          "relevant": true
-        },
-        {
-          "key": "07caf2a7f85a",
-          "title": "Carbon dioxide in the atmosphere of Earth",
-          "section": "Anthropogenic CO2 emissions",
-          "snippet": "While CO2 absorption and release is always happening as a result of natural processes, the recent rise in CO2 levels in the atmosphere is known to be mainly due to human (anthropogenic) activity. Anthropogenic carbon emissions exceed the am",
-          "retrievers": [
-            "dense",
-            "hybrid"
-          ],
-          "relevant": true
-        },
-        {
-          "key": "1a72766976c0",
-          "title": "Carbon dioxide in the atmosphere of Earth",
-          "section": "Concentrations in the geologic past",
-          "snippet": "carbon dioxide concentrations in the early Earth's atmosphere might help explain this faint young sun paradox. When Earth first formed, Earth's atmosphere may have contained more greenhouse gases and CO2 concentrations may have been higher,",
-          "retrievers": [
-            "dense",
-            "bm25",
-            "hybrid"
-          ],
-          "relevant": true
-        },
-        {
-          "key": "d463439594cd",
-          "title": "Carbon dioxide in the atmosphere of Earth",
-          "section": "Measuring ancient-Earth CO2 concentration",
-          "snippet": "280–300 ppm during warmer interglacials. CO2 mole fractions in the atmosphere have gone up by around 35 percent since the 1900s, rising from 280 parts per million by volume to 387 parts per million in 2009. One study using evidence from sto",
+          "key": "38db887a836d",
+          "title": "Greenhouse gas",
+          "section": "List of all greenhouse gases",
+          "snippet": "The contribution of each gas to the enhanced greenhouse effect is determined by the characteristics of that gas, its abundance, and any indirect effects it may cause. For example, the direct radiative effect of a mass of methane is about 84",
           "retrievers": [
             "bm25",
             "hybrid"
           ],
-          "relevant": true
+          "relevant": false
+        },
+        {
+          "key": "9ad15dc3f2fd",
+          "title": "Global warming potential",
+          "section": "Carbon dioxide equivalent",
+          "snippet": "gases in the atmosphere can also be expressed as a carbon dioxide equivalent concentration. It is the atmospheric concentration of CO2 which would warm the earth as much as a particular concentration of some other gas or of all gases and ae",
+          "retrievers": [
+            "bm25"
+          ],
+          "relevant": false
         },
         {
           "key": "53e91cb34149",
@@ -322,20 +330,20 @@
           "relevant": true
         },
         {
-          "key": "467d38ef55bc",
-          "title": "Carbon dioxide in the atmosphere of Earth",
-          "section": "Oceanic carbon cycle",
-          "snippet": "The Earth's oceans contain a large amount of CO2 in the form of bicarbonate and carbonate ions—much more than the amount in the atmosphere. The bicarbonate is produced in reactions between rock, water, and carbon dioxide. From 1850 until 20",
+          "key": "9e7053c0a31f",
+          "title": "Sea level rise",
+          "section": "Past sea level rise",
+          "snippet": "An understanding of past sea level is an important guide to where current changes in sea level will end up. In the recent geological past, thermal expansion from increased temperatures and changes in land ice are the dominant reasons of sea",
           "retrievers": [
             "bm25"
           ],
-          "relevant": true
+          "relevant": false
         },
         {
-          "key": "54d9f64e3513",
+          "key": "d463439594cd",
           "title": "Carbon dioxide in the atmosphere of Earth",
-          "section": "60 to 5 million years ago",
-          "snippet": "Atmospheric CO2 concentration continued to fall after about 60 million years ago. About 34 million years ago, the time of the Eocene–Oligocene extinction event and when the Antarctic ice sheet started to take its current form, CO2 was about",
+          "section": "Measuring ancient-Earth CO2 concentration",
+          "snippet": "280–300 ppm during warmer interglacials. CO2 mole fractions in the atmosphere have gone up by around 35 percent since the 1900s, rising from 280 parts per million by volume to 387 parts per million in 2009. One study using evidence from sto",
           "retrievers": [
             "bm25",
             "hybrid"
@@ -343,14 +351,24 @@
           "relevant": true
         },
         {
-          "key": "1f6139437901",
-          "title": "Climate change",
-          "section": "Warming since the Industrial Revolution",
-          "snippet": "Around 1850 thermometer records began to provide global coverage. Between the 18th century and 1970 there was little net warming, as the warming impact of greenhouse gas emissions was offset by cooling from sulfur dioxide emissions. Sulfur ",
+          "key": "e69d1ddd2d33",
+          "title": "Coal",
+          "section": "Climate change",
+          "snippet": "The largest and most long-term effect of coal use is the release of carbon dioxide, a greenhouse gas that causes climate change. Coal-fired power plants were the single largest contributor to the growth in global CO2 emissions in 2018, 40% ",
           "retrievers": [
             "bm25"
           ],
           "relevant": false
+        },
+        {
+          "key": "07caf2a7f85a",
+          "title": "Carbon dioxide in the atmosphere of Earth",
+          "section": "Anthropogenic CO2 emissions",
+          "snippet": "While CO2 absorption and release is always happening as a result of natural processes, the recent rise in CO2 levels in the atmosphere is known to be mainly due to human (anthropogenic) activity. Anthropogenic carbon emissions exceed the am",
+          "retrievers": [
+            "hybrid"
+          ],
+          "relevant": true
         }
       ]
     },
@@ -358,6 +376,28 @@
       "claim_id": "fx001-5",
       "claim_text": "but here's the stat that really got me the international energy agency reported that solar became the cheapest source of new electricity generation in most of the world",
       "candidates": [
+        {
+          "key": "94e083f408cc",
+          "title": "Photovoltaics",
+          "section": null,
+          "snippet": "2004 and 2011. Module prices dropped by about 90% over the 2010s. In 2022, worldwide installed PV capacity increased to more than 1 terawatt (TW) covering nearly two percent of global electricity demand. After hydro and wind powers, PV is t",
+          "retrievers": [
+            "dense",
+            "bm25",
+            "hybrid"
+          ],
+          "relevant": false
+        },
+        {
+          "key": "5b1b775bf42d",
+          "title": "Renewable energy",
+          "section": "History",
+          "snippet": "for an escape from dependence on oil, and the first electricity-generating wind turbines appeared. Solar had long been used for heating and cooling, but solar panels were too costly to build solar farms until 1980. New government spending, ",
+          "retrievers": [
+            "dense"
+          ],
+          "relevant": false
+        },
         {
           "key": "4a6fe8bbcf15",
           "title": "Solar power",
@@ -389,10 +429,19 @@
           "snippet": "Despite the rising cost of materials, such as polysilicon, during the 2021–2022 global energy crisis, utility scale solar was still the least expensive energy source in many countries due to the rising costs of other energy sources, such as",
           "retrievers": [
             "dense",
-            "bm25",
             "hybrid"
           ],
           "relevant": true
+        },
+        {
+          "key": "82425f9e50b7",
+          "title": "Photovoltaics",
+          "section": "Growth",
+          "snippet": "Solar photovoltaics formed the largest body of research among the seven sustainable energy types examined in a global bibliometric study, with the annual scientific output growing from 9,094 publications in 2011 to 14,447 publications in 20",
+          "retrievers": [
+            "dense"
+          ],
+          "relevant": false
         },
         {
           "key": "df17b121f138",
@@ -406,65 +455,56 @@
           "relevant": true
         },
         {
-          "key": "e60d45b25e7d",
-          "title": "Solar power",
-          "section": "Forecasts",
-          "snippet": "Solar is forecast to become the largest source of renewable power before the end of the 2020s, exceeding the output of hydropower. Utility scale is forecast to become the largest source of electricity in all regions except sub-Saharan Afric",
+          "key": "78a6ba0180a1",
+          "title": "Renewable energy",
+          "section": "Solar energy",
+          "snippet": "reductions in Japan and India due to policy changes and COVID-19, growth in China, the United States, and a significant increase from Vietnam's feed-in tariff program offset these declines. Globally, the solar sector added 714 gigawatts (GW",
+          "retrievers": [
+            "dense"
+          ],
+          "relevant": false
+        },
+        {
+          "key": "d977e8d3dc3d",
+          "title": "Renewable energy",
+          "section": "Solar energy",
+          "snippet": "installed capacity in 2021, compared to 25 GW of solar thermal. Passive solar refers to a range of construction strategies and technologies that aim to optimize the distribution of solar heat in a building. Examples include solar chimneys, ",
+          "retrievers": [
+            "dense"
+          ],
+          "relevant": false
+        },
+        {
+          "key": "3c5c929bce4b",
+          "title": "Renewable energy",
+          "section": null,
+          "snippet": "dammed hydroelectricity, bioenergy, or geothermal power. For an energy to be renewable, it must be an endless source. Nuclear power is therefore not considered renewable, due to its reliance on non-renewable fuel. Renewable energy systems h",
           "retrievers": [
             "dense",
             "hybrid"
           ],
-          "relevant": true
+          "relevant": false
         },
         {
-          "key": "290b6a5b1c31",
-          "title": "Solar power",
-          "section": "2010s",
-          "snippet": "For several years, worldwide growth of solar PV was driven by European deployment, but it then shifted to Asia, especially China and Japan, and to a growing number of countries and regions all over the world. Chinese manufacturers of solar ",
+          "key": "390b572dd1ee",
+          "title": "Renewable energy",
+          "section": "Market and industry trends",
+          "snippet": "Most new renewables are solar, followed by wind then hydro then bioenergy. Investment in renewables, especially solar, tends to be more effective in creating jobs than coal, gas or oil. Worldwide, renewables employ about 12 million people a",
           "retrievers": [
-            "dense"
+            "bm25",
+            "hybrid"
           ],
-          "relevant": true
+          "relevant": false
         },
         {
-          "key": "b34c9f08b44f",
-          "title": "Solar power",
-          "section": "Installation prices",
-          "snippet": "Expenses of high-power band solar modules has greatly decreased over time. Beginning in 1982, the cost per kW was approximately 27,000 American dollars, and in 2006 the cost dropped to approximately 4,000 American dollars per kW. The PV sys",
+          "key": "0a7b945a1fb0",
+          "title": "Renewable energy",
+          "section": "Market and industry trends",
+          "snippet": "renewable energy sector. The International Renewable Energy Agency reported that during 2025 renewables accounted for 85.6% of new electricity generation capacity globally, with solar photovoltaics providing nearly three-quarters of the inc",
           "retrievers": [
-            "dense"
+            "bm25"
           ],
-          "relevant": true
-        },
-        {
-          "key": "2831d3325c3f",
-          "title": "Solar power",
-          "section": "Politics",
-          "snippet": "of their climate change denial. Although Green parties may favor solar as part of climate change mitigation some environmentalists oppose new power lines. In 2022, over 40% of global polysilicon manufacturing capacity was in Xinjiang in Chi",
-          "retrievers": [
-            "dense"
-          ],
-          "relevant": true
-        },
-        {
-          "key": "ca624c17579d",
-          "title": "Solar power",
-          "section": "Early days",
-          "snippet": "in 1957. By the 1970s, solar panels were still too expensive for much other than satellites. In 1974 it was estimated that only six private homes in all of North America were entirely heated or cooled by functional solar power systems. Howe",
-          "retrievers": [
-            "dense"
-          ],
-          "relevant": true
-        },
-        {
-          "key": "1692dc06b3cc",
-          "title": "Solar power",
-          "section": "Environmental effects",
-          "snippet": "could be up to 150 g/kWh. In contrast, a combined cycle gas-fired power plant without carbon capture and storage emits around 500 g/kWh, and a coal-fired power plant about 1000 g/kWh. Similar to all energy sources where their total life cyc",
-          "retrievers": [
-            "dense"
-          ],
-          "relevant": true
+          "relevant": false
         },
         {
           "key": "2f94684d16fe",
@@ -477,15 +517,25 @@
           "relevant": false
         },
         {
-          "key": "2eaf241643f0",
-          "title": "Nuclear power",
-          "section": "Current prospects",
-          "snippet": "By 2015, the IAEA's outlook for nuclear energy had become more promising, recognizing the importance of low-carbon generation for mitigating climate change. As of 2015, the global trend was for new nuclear power stations coming online to be",
+          "key": "63d14cec2ca6",
+          "title": "Photovoltaics",
+          "section": "Growth",
+          "snippet": "in the European Union, according to International Energy Agency data. Other countries with the world's largest solar power capacities include the United States, Japan and Germany. In 2017, it was thought probable that by 2030 global PV inst",
           "retrievers": [
             "bm25",
             "hybrid"
           ],
           "relevant": false
+        },
+        {
+          "key": "c30e501db101",
+          "title": "International Energy Agency",
+          "section": "Bias against renewable energy",
+          "snippet": "that '80% of the increase in global electricity generation in 2024 was provided by renewable sources and nuclear', placing nuclear power production alongside renewable energy sources as if both were being expanded on a grand scale. While it",
+          "retrievers": [
+            "bm25"
+          ],
+          "relevant": true
         },
         {
           "key": "0fa00adbeae6",
@@ -499,45 +549,22 @@
           "relevant": true
         },
         {
-          "key": "c30e501db101",
-          "title": "International Energy Agency",
-          "section": "Bias against renewable energy",
-          "snippet": "that '80% of the increase in global electricity generation in 2024 was provided by renewable sources and nuclear', placing nuclear power production alongside renewable energy sources as if both were being expanded on a grand scale. While it",
-          "retrievers": [
-            "bm25",
-            "hybrid"
-          ],
-          "relevant": true
-        },
-        {
           "key": "c6567fabc424",
           "title": "Climate change",
           "section": "Clean energy",
           "snippet": "Renewable energy is key to limiting climate change. For decades, fossil fuels have accounted for roughly 80% of the world's energy use. The remaining share has been split between nuclear power and renewables (including hydropower, bioenergy",
           "retrievers": [
-            "bm25",
-            "hybrid"
+            "bm25"
           ],
           "relevant": false
         },
         {
-          "key": "a8f98c20b332",
-          "title": "International Energy Agency",
-          "section": "Bias against renewable energy",
-          "snippet": "solar. A 2008 EWG report compares IEA projections about the growth of wind power capacity and finds that it has consistently underestimated the amount of energy the wind power industry can deliver. For example, in 1998, the IEA predicted gl",
+          "key": "c38f272039a2",
+          "title": "Renewable energy",
+          "section": "Solar energy",
+          "snippet": "Solar power produced around 1.3 terrawatt-hours (TWh) worldwide in 2022, representing 4.6% of the world's electricity. Almost all of this growth has happened since 2010. Solar energy can be harnessed anywhere that receives sunlight; however",
           "retrievers": [
-            "bm25",
             "hybrid"
-          ],
-          "relevant": true
-        },
-        {
-          "key": "e54d771cde95",
-          "title": "Nuclear power",
-          "section": "Production",
-          "snippet": "and 87 reactors planned, with a combined capacity of 72 GW and 84 GW, respectively. The United States has the largest fleet of nuclear reactors, generating over 800 TWh per year with an average capacity factor of 92%. Most reactors under co",
-          "retrievers": [
-            "bm25"
           ],
           "relevant": false
         }
@@ -569,6 +596,16 @@
             "hybrid"
           ],
           "relevant": true
+        },
+        {
+          "key": "6abaf4cd3f40",
+          "title": "Three Mile Island accident",
+          "section": "Effect on nuclear power industry",
+          "snippet": "of the earlier 1973 oil crisis and post-crisis analysis with conclusions of potential overcapacity in base load, 40 planned nuclear power plants already had been canceled before the accident. At the time of the incident, 129 nuclear power p",
+          "retrievers": [
+            "dense"
+          ],
+          "relevant": false
         },
         {
           "key": "7af63c8a399b",
@@ -605,13 +642,22 @@
           "relevant": true
         },
         {
+          "key": "f24555cf51fa",
+          "title": "Fukushima nuclear accident",
+          "section": null,
+          "snippet": "On 11 March 2011, a major nuclear accident started at the Fukushima Daiichi Nuclear Power Plant in Ōkuma, Fukushima, Japan. The direct cause was the Tōhoku earthquake and tsunami, which resulted in electrical grid failure and damaged nearly",
+          "retrievers": [
+            "dense"
+          ],
+          "relevant": false
+        },
+        {
           "key": "bf4e2cf5f8e3",
           "title": "Nuclear power",
           "section": "Safety",
           "snippet": "is the large containment building. With a death rate of 0.03 per TWh, nuclear power is the second safest energy source per unit of energy generated, after solar power, in terms of mortality when the historical track-record is considered. En",
           "retrievers": [
             "dense",
-            "bm25",
             "hybrid"
           ],
           "relevant": true
@@ -639,12 +685,13 @@
           "relevant": true
         },
         {
-          "key": "048b6109d245",
-          "title": "Chernobyl disaster",
-          "section": null,
-          "snippet": "around 49,000 people. This was later expanded to 30 kilometres (19 mi), resulting in the evacuation of approximately 68,000 more people. The government did not publicly acknowledge the disaster until two days after the explosion, when eleva",
+          "key": "2e4bfbaddbb9",
+          "title": "Nuclear power",
+          "section": "Debate",
+          "snippet": "Proponents also claim that the present quantity of nuclear waste is small and can be reduced through the latest technology of newer reactors and that the operational safety record of fission-electricity in terms of deaths is so far \"unparal",
           "retrievers": [
-            "dense"
+            "bm25",
+            "hybrid"
           ],
           "relevant": true
         },
@@ -653,18 +700,6 @@
           "title": "Nuclear power",
           "section": "Chernobyl and renaissance",
           "snippet": "During the 1980s one new nuclear reactor started up every 17 days on average. By the end of the decade, global installed nuclear capacity reached 300 GW. Since the late 1980s, new capacity additions slowed significantly, with the installed ",
-          "retrievers": [
-            "dense",
-            "bm25",
-            "hybrid"
-          ],
-          "relevant": true
-        },
-        {
-          "key": "2e4bfbaddbb9",
-          "title": "Nuclear power",
-          "section": "Debate",
-          "snippet": "Proponents also claim that the present quantity of nuclear waste is small and can be reduced through the latest technology of newer reactors and that the operational safety record of fission-electricity in terms of deaths is so far \"unparal",
           "retrievers": [
             "bm25",
             "hybrid"
@@ -682,16 +717,6 @@
           "relevant": true
         },
         {
-          "key": "59951677bc18",
-          "title": "Chernobyl disaster",
-          "section": "Fire containment",
-          "snippet": "saw graphite scattered about. Misha asked: \"Is that graphite?\" I kicked it away. But one of the fighters on the other truck picked it up. \"It's hot,\" he said. The pieces of graphite were of different sizes, some big, some small enough to pi",
-          "retrievers": [
-            "bm25"
-          ],
-          "relevant": true
-        },
-        {
           "key": "72e4cdaa51da",
           "title": "Chernobyl disaster",
           "section": null,
@@ -703,11 +728,22 @@
           "relevant": true
         },
         {
+          "key": "ac2df876150a",
+          "title": "Chernobyl disaster",
+          "section": "Nuclear debate",
+          "snippet": "Italy, political fallout from the Chernobyl accident was reflected in the outcome of the 1987 nuclear power referendum. As a result, Italy began phasing out its nuclear power plants in 1988, a decision that was effectively reversed in 2008.",
+          "retrievers": [
+            "bm25"
+          ],
+          "relevant": true
+        },
+        {
           "key": "f1397acd3dc1",
           "title": "Nuclear power",
           "section": "Fukushima accident",
           "snippet": "Prospects of a nuclear renaissance were delayed by another nuclear accident. The 2011 Fukushima Daiichi nuclear accident was caused by the Tōhoku earthquake and tsunami, one of the largest earthquakes ever recorded. The Fukushima Daiichi Nu",
           "retrievers": [
+            "bm25",
             "hybrid"
           ],
           "relevant": true

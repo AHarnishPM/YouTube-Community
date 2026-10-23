@@ -15,7 +15,7 @@ cd "CS 4701/YouTube-Community"
 ./.venv/bin/python -m rag.cli stats
 ```
 
-If that prints 457 passages and 7 pinned revisions, you are ready. Nothing to install.
+If that prints 9,484 passages and 7 pinned revisions, you are ready. Nothing to install.
 
 **Warm the model cache first.** The first command that touches the encoder loads it from
 disk; do this once before anyone is watching:
@@ -51,7 +51,7 @@ One command, six narrated sections:
 
 Let it print, then walk back through it. What to say at each section:
 
-**1. The evidence corpus.** "Seven Wikipedia articles, fetched once and pinned by revision
+**1. The evidence corpus.** "138 Wikipedia articles, fetched once and pinned by revision
 ID. Every passage carries title, section, URL and revision — so a citation points at the
 *exact* text we read, not at whatever Wikipedia says today."
 
@@ -66,16 +66,17 @@ an opinion, a story about someone's cousin, and a sponsor read. None of those ar
 *checkable*, so none deserve a note. That decision is Mikko's component — I consume the
 verdict, I don't re-make it."
 
-**4. Retrieval.** "One matrix multiply against 457 passages, a few milliseconds." Then the
+**4. Retrieval.** "One matrix multiply against 9,484 passages, a few milliseconds." Then the
 trap worth pre-empting: **"The scores aren't comparable across retrievers. Dense is cosine
 0–1, BM25 is unbounded, and hybrid uses rank fusion so 0.033 is a *first-place* result.
 Compare ranks, never scores."**
 
-**5. No abstention.** "Ask about the Roman Empire and you get Chernobyl passages — at 0.165
-instead of 0.673. Expected, not broken: cosine similarity always has a top-k. But it's the
-most important open problem, because once note generation exists the model would
-confidently cite those. A 4× separation means a threshold will work; I just won't pick it
-by eyeballing two examples."
+**5. No abstention.** "A claim nothing can support still returns results — a made-up claim about
+a neighbour's dog returns *Industrial Revolution* at 0.311, against 0.657 for a covered
+claim. Expected, not broken: cosine similarity always has a top-k. It's the most important
+open problem, because once note generation exists the model would confidently cite those.
+And the gap is only about 2× — it looked like 4× on a 7-article corpus, which is exactly
+why I won't pick the threshold by eyeballing examples."
 
 **6. The silent-failure guard.** "The encoder truncates past 256 tokens *silently*. Our
 first chunker used 220-word passages, ~290 tokens — the tail of every long passage was
@@ -141,7 +142,7 @@ thousandths. I only noticed because I printed the text. This is exactly why the 
 exists — 'the results look relevant' is not a measurement."
 
 **Pre-empt the fairness question.** Someone will suspect cherry-picking. Say: "the corpus is
-seven articles on climate and energy, so anything outside that will fail — and that's the
+138 articles spanning climate, health, history, physics, economics and technology, so anything outside that will fail — and that's the
 honest limitation. It's also why eyeballing claims can't measure quality; only the eval can."
 
 ### Show that reproducibility is real, not claimed
@@ -237,7 +238,7 @@ provisional labels afterwards:
 cp data/eval/labels.json /tmp/labels.bak.json     # restore with cp back
 ```
 
-What to say: "Judging all 457 passages against 50 claims is 22,850 decisions. Pooling — the
+What to say: "Judging all 9,484 passages against 50 claims is 22,850 decisions. Pooling — the
 standard method since TREC in 1992 — takes the union of all three retrievers' top-10 and
 judges only that: about 16 per claim. The cost is explicit: a relevant passage no retriever
 surfaced never gets judged, so pooled recall is an *upper bound* on true recall. `eval`

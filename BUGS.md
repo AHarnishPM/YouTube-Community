@@ -117,7 +117,7 @@ Stop pretending it is possible:
 - **Removed** the `revision_id` parameter from `fetch_article` entirely. A parameter that
   returns a different content format is worse than no parameter.
 - **The committed corpus text is now the reproducible artifact.** `data/corpus/articles.jsonl`
-  (324K) is committed rather than gitignored. It is the only thing that preserves the pinned text.
+  (7.0M) is committed rather than gitignored. It is the only thing that preserves the pinned text.
 - **`build --pinned` now reuses that committed text** instead of re-fetching.
 - **The manifest's job changed** from *regenerate* to *detect drift* — new `check_drift()` and
   a `drift` command report which articles have moved since the corpus was built.
