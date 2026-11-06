@@ -1,29 +1,4 @@
 (function () {
-  const BUBBLE_ID = "ytc-hello-bubble";
-
-  function injectBubble() {
-    if (document.getElementById(BUBBLE_ID)) return;
-
-    const timeDisplay = document.querySelector(".ytp-time-display");
-    if (!timeDisplay) return;
-
-    const bubble = document.createElement("span");
-    bubble.id = BUBBLE_ID;
-    bubble.className = "ytc-bubble";
-
-    const inner = document.createElement("span");
-    inner.className = "ytc-bubble-inner";
-    inner.textContent = "Hello World";
-    bubble.appendChild(inner);
-
-    timeDisplay.insertAdjacentElement("afterend", bubble);
-  }
-
-  const observer = new MutationObserver(injectBubble);
-  observer.observe(document.body, { childList: true, subtree: true });
-
-  injectBubble();
-
   let lastVideoId = null;
 
   function formatTime(seconds) {
@@ -32,14 +7,104 @@
     return `${m}:${s}`;
   }
 
+  async function callBackground(type, payload) {
+    const response = await chrome.runtime.sendMessage({ type, ...payload });
+    if (!response.ok) throw new Error(response.error);
+    return response.value;
+  }
+
+  // Resolves to undefined on failure, which tells the background worker to keep the previously saved copy.
+  async function attempt(label, videoId, fn) {
+    try {
+      return await fn();
+    } catch (err) {
+      if (!chrome.runtime?.id) throw err;
+      console.warn(`[YouTube Community] Couldn't fetch ${label} for ${videoId}`, err);
+      return undefined;
+    }
+  }
+
+  // Each page is 100 comments and 1 unit of the 10,000-unit daily YouTube quota, so cap very popular videos.
+  const MAX_COMMENT_PAGES = 100;
+  const COMMENTS_REFRESH_MS = 3 * 60 * 60 * 1000;
+  // Overlap the previous refresh slightly in case this computer's clock is behind YouTube's.
+  const CLOCK_SKEW_MS = 60 * 1000;
+
+  // Fetches comments newest first, stopping once it reaches ones the stored copy already covers.
+  // With nothing stored, it scans everything (up to the page cap).
+  async function refreshComments(videoId, durationSeconds, stored) {
+    const startedAt = Date.now();
+    const sinceMs = stored ? stored.fetchedAt - CLOCK_SKEW_MS : null;
+    const byId = new Map((stored?.items ?? []).map((c) => [c.id, c]));
+    let newlyScanned = 0;
+    let pageToken = null;
+    let reachedSince = false;
+    let pages = 0;
+    do {
+      const page = await callBackground("fetchCommentsPage", { videoId, durationSeconds, pageToken, sinceMs });
+      if (videoId !== lastVideoId) return undefined;
+      for (const comment of page.comments) byId.set(comment.id, comment);
+      newlyScanned += page.scanned;
+      pageToken = page.nextPageToken;
+      reachedSince = page.reachedSince;
+      pages++;
+      setOverlayComments([...byId.values()]);
+    } while (pageToken && !reachedSince && pages < MAX_COMMENT_PAGES);
+
+    return {
+      saved: { fetchedAt: startedAt, scannedCount: (stored?.scannedCount ?? 0) + newlyScanned, items: [...byId.values()] },
+      newlyScanned,
+      pages,
+      hitPageCap: Boolean(pageToken) && !reachedSince,
+    };
+  }
+
+  // Resolves to the comments to save, or undefined when nothing needs saving.
+  async function loadComments(videoId, durationSeconds) {
+    // null means nothing is saved yet; undefined means the read failed.
+    let stored = await attempt("saved comments", videoId, () => callBackground("getStoredComments", { videoId }));
+    if (videoId !== lastVideoId) return undefined;
+    // Skip YouTube when Firebase is unreachable, so an outage can't burn quota with full rescans on every visit.
+    if (stored === undefined) return undefined;
+    // Saves from before timestamp filtering have no scannedCount and include comments without timestamps.
+    if (stored && stored.scannedCount === undefined) stored = null;
+
+    if (stored) {
+      setOverlayComments(stored.items ?? []);
+      const ageMs = Date.now() - stored.fetchedAt;
+      if (ageMs < COMMENTS_REFRESH_MS) {
+        console.log(
+          `[YouTube Community] Using ${stored.items?.length ?? 0} saved timestamped comments for ${videoId} ` +
+            `(refreshed ${Math.round(ageMs / 60000)} min ago)`
+        );
+        return undefined;
+      }
+    }
+
+    const result = await attempt("comments", videoId, () => refreshComments(videoId, durationSeconds, stored));
+    if (!result) return undefined;
+    console.log(
+      `[YouTube Community] ${stored ? "Refreshed" : "Scanned"} ${result.newlyScanned} ${stored ? "new " : ""}comments ` +
+        `for ${videoId} in ${result.pages} request${result.pages === 1 ? "" : "s"}, ` +
+        `${result.saved.items.length} timestamped in total` +
+        (result.hitPageCap ? ` (stopped at the ${MAX_COMMENT_PAGES}-page cap)` : "")
+    );
+    return result.saved;
+  }
+
   async function syncVideo() {
     const videoId = new URLSearchParams(location.search).get("v");
     if (location.pathname !== "/watch" || !videoId || videoId === lastVideoId) return;
     lastVideoId = videoId;
+    setOverlayComments([]);
 
     try {
       const { durationSeconds, captionTracks } = await fetchVideoInfo(videoId);
-      const transcript = await fetchTranscript(captionTracks);
+
+      const comments = await loadComments(videoId, durationSeconds);
+      if (videoId !== lastVideoId) return;
+
+      const transcript = await attempt("transcript", videoId, () => fetchTranscript(captionTracks));
       if (transcript) {
         const preview = transcript.lines
           .slice(0, 100)
@@ -49,44 +114,33 @@
           `[YouTube Community] Transcript for ${videoId} (${transcript.languageCode}` +
             `${transcript.autoGenerated ? ", auto-generated" : ""}, ${transcript.lines.length} lines):\n${preview}`
         );
-      } else {
+      } else if (transcript === null) {
         console.log(`[YouTube Community] No transcript available for ${videoId}`);
       }
 
-      // Left undefined on failure so the background worker keeps any previously saved chapters.
-      let chapters;
-      try {
-        chapters = await fetchCreatorChapters(videoId, durationSeconds);
+      const chapters = await attempt("chapters", videoId, () => fetchCreatorChapters(videoId, durationSeconds));
+      if (chapters) {
         const list = chapters.map((c) => `[${formatTime(c.start)}] ${c.title}`).join("\n");
         console.log(
           chapters.length > 0
             ? `[YouTube Community] ${chapters.length} creator chapters for ${videoId}:\n${list}`
             : `[YouTube Community] No creator chapters for ${videoId}`
         );
-      } catch (err) {
-        console.warn(`[YouTube Community] Couldn't fetch chapters for ${videoId}`, err);
       }
 
-      const result = await chrome.runtime.sendMessage({
-        type: "saveVideo",
-        videoId,
-        durationSeconds,
-        transcript,
-        chapters,
-      });
-      if (!result.ok) {
-        console.error(`[YouTube Community] Failed to save ${videoId} to Firebase: ${result.error}`);
+      try {
+        await callBackground("saveVideo", { videoId, transcript, chapters, comments });
+      } catch (err) {
+        if (!chrome.runtime?.id) throw err;
+        console.error(`[YouTube Community] Failed to save ${videoId} to Firebase: ${err.message}`);
         return;
       }
 
       const saved = [];
       if (transcript) saved.push("transcript");
       if (chapters?.length > 0) saved.push(`${chapters.length} chapters`);
-      if (result.commentCount !== undefined) saved.push(`${result.commentCount} comments`);
+      if (comments) saved.push(`${comments.items.length} timestamped comments`);
       if (saved.length > 0) console.log(`[YouTube Community] Saved ${saved.join(", ")} for ${videoId} to Firebase`);
-      if (result.commentsError) {
-        console.warn(`[YouTube Community] Couldn't fetch comments for ${videoId}: ${result.commentsError}`);
-      }
     } catch (err) {
       // chrome.runtime.id disappears when the extension is reloaded while this tab stays open.
       if (!chrome.runtime?.id) {

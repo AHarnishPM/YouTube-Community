@@ -55,7 +55,10 @@ function firstTimestampSeconds(text, durationSeconds) {
   return null;
 }
 
-async function fetchTopComments(videoId, durationSeconds) {
+// One page is up to 100 top-level comments, newest first, and costs 1 unit of YouTube API quota.
+// Only comments published at or after sinceMs (if given) are considered; reachedSince tells the
+// caller that older comments started appearing, so there's no need to fetch further pages.
+async function fetchTimestampedCommentsPage(videoId, durationSeconds, pageToken, sinceMs) {
   if (typeof YOUTUBE_API_KEY === "undefined") {
     throw new Error(
       "YOUTUBE_API_KEY is missing from config.js. Declare it as its own `const YOUTUBE_API_KEY = \"...\";`, not inside FIREBASE_CONFIG."
@@ -66,10 +69,11 @@ async function fetchTopComments(videoId, durationSeconds) {
     part: "snippet",
     videoId,
     maxResults: "100",
-    order: "relevance",
+    order: "time",
     textFormat: "plainText",
     key: YOUTUBE_API_KEY,
   });
+  if (pageToken) params.set("pageToken", pageToken);
   const res = await fetch(`https://www.googleapis.com/youtube/v3/commentThreads?${params}`);
   if (!res.ok) {
     const body = await res.json().catch(() => null);
@@ -77,18 +81,41 @@ async function fetchTopComments(videoId, durationSeconds) {
   }
   const data = await res.json();
 
-  return data.items.map((item) => {
-    const comment = item.snippet.topLevelComment.snippet;
-    return {
-      id: item.id,
-      author: comment.authorDisplayName,
-      text: comment.textDisplay,
-      timestamp: firstTimestampSeconds(comment.textDisplay, durationSeconds),
-      likeCount: comment.likeCount,
-      replyCount: item.snippet.totalReplyCount,
-      publishedAt: comment.publishedAt,
-    };
-  });
+  const newItems = sinceMs
+    ? data.items.filter((item) => Date.parse(item.snippet.topLevelComment.snippet.publishedAt) >= sinceMs)
+    : data.items;
+
+  const comments = newItems
+    .map((item) => {
+      const comment = item.snippet.topLevelComment.snippet;
+      return {
+        id: item.id,
+        author: comment.authorDisplayName,
+        text: comment.textDisplay,
+        timestamp: firstTimestampSeconds(comment.textDisplay, durationSeconds),
+        likeCount: comment.likeCount,
+        replyCount: item.snippet.totalReplyCount,
+        publishedAt: comment.publishedAt,
+      };
+    })
+    .filter((c) => c.timestamp !== null);
+
+  return {
+    comments,
+    scanned: newItems.length,
+    reachedSince: newItems.length < data.items.length,
+    nextPageToken: data.nextPageToken ?? null,
+  };
+}
+
+async function getStoredComments({ videoId }) {
+  if (!VIDEO_ID_PATTERN.test(videoId)) throw new Error(`invalid video id: ${videoId}`);
+  const idToken = await getIdToken();
+  const res = await fetch(
+    `${FIREBASE_CONFIG.databaseURL}/videos/${videoId}/comments.json?auth=${encodeURIComponent(idToken)}`
+  );
+  if (!res.ok) throw new Error(`database read failed: ${res.status} ${await res.text()}`);
+  return res.json();
 }
 
 // PATCH only replaces the listed children, so other data under the video (e.g. communityNotes) is untouched.
@@ -103,34 +130,34 @@ async function updateVideo(videoId, fields) {
   if (!res.ok) throw new Error(`database write failed: ${res.status} ${await res.text()}`);
 }
 
-async function saveVideo({ videoId, durationSeconds, transcript, chapters }) {
+// Fields left undefined (because fetching them failed) are not written, so previously saved copies are kept.
+async function saveVideo({ videoId, transcript, chapters, comments }) {
   if (!VIDEO_ID_PATTERN.test(videoId)) throw new Error(`invalid video id: ${videoId}`);
 
   const fields = {};
-  const result = {};
   if (transcript) fields.transcript = { ...transcript, fetchedAt: Date.now() };
   // A "chapters/creator" path key updates only that child, leaving chapters/generated alone.
   // Writing null deletes stale chapters if the creator has since removed them.
   if (chapters) {
     fields["chapters/creator"] = chapters.length > 0 ? { fetchedAt: Date.now(), items: chapters } : null;
   }
-
-  try {
-    const items = await fetchTopComments(videoId, durationSeconds);
-    fields.comments = { fetchedAt: Date.now(), items };
-    result.commentCount = items.length;
-  } catch (err) {
-    result.commentsError = err.message;
-  }
+  if (comments) fields.comments = comments;
 
   if (Object.keys(fields).length > 0) await updateVideo(videoId, fields);
-  return result;
 }
 
+const messageHandlers = {
+  fetchCommentsPage: ({ videoId, durationSeconds, pageToken, sinceMs }) =>
+    fetchTimestampedCommentsPage(videoId, durationSeconds, pageToken, sinceMs),
+  getStoredComments,
+  saveVideo,
+};
+
 chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
-  if (message.type !== "saveVideo") return;
-  saveVideo(message).then(
-    (result) => sendResponse({ ok: true, ...result }),
+  const handler = messageHandlers[message.type];
+  if (!handler) return;
+  handler(message).then(
+    (value) => sendResponse({ ok: true, value }),
     (err) => sendResponse({ ok: false, error: err.message })
   );
   return true;
