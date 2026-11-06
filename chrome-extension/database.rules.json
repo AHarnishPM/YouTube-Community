@@ -4,7 +4,15 @@
       "$videoId": {
         ".read": "auth != null",
         ".write": "auth != null",
-        ".validate": "$videoId.matches(/^[A-Za-z0-9_-]{11}$/)"
+        ".validate": "$videoId.matches(/^[A-Za-z0-9_-]{11}$/)",
+        "communityNotes": {
+          "$noteId": {
+            ".validate": "newData.hasChildren(['text', 'start', 'duration'])",
+            "text": { ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 1000" },
+            "start": { ".validate": "newData.isNumber() && newData.val() >= 0" },
+            "duration": { ".validate": "newData.isNumber() && newData.val() > 0" }
+          }
+        }
       }
     }
   }

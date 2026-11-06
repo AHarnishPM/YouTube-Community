@@ -14,12 +14,13 @@
     "https://*.firebaseio.com/*",
     "https://*.firebasedatabase.app/*",
     "https://identitytoolkit.googleapis.com/*",
-    "https://securetoken.googleapis.com/*"
+    "https://securetoken.googleapis.com/*",
+    "https://www.googleapis.com/*"
   ],
   "content_scripts": [
     {
       "matches": ["https://www.youtube.com/*"],
-      "js": ["transcript.js", "content.js"],
+      "js": ["youtube.js", "content.js"],
       "css": ["content.css"]
     }
   ]

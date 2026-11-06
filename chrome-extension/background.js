@@ -42,23 +42,95 @@ async function getIdToken() {
   return cachedToken.idToken;
 }
 
-async function saveTranscript({ videoId, ...transcript }) {
-  if (!VIDEO_ID_PATTERN.test(videoId)) throw new Error(`invalid video id: ${videoId}`);
+// Matches m:ss, mm:ss, mmm:ss, and h:mm:ss, but not pieces of longer runs like 1:2:3:45.
+const TIMESTAMP_PATTERN = /(?<![\d:])(?:(\d{1,2}):)?(\d{1,3}):([0-5]\d)(?![\d:])/g;
 
+// Out-of-range matches are skipped since they're probably not timestamps (e.g. "9:45 am").
+function firstTimestampSeconds(text, durationSeconds) {
+  for (const [, hours, minutes, seconds] of text.matchAll(TIMESTAMP_PATTERN)) {
+    if (hours !== undefined && Number(minutes) >= 60) continue;
+    const total = Number(hours ?? 0) * 3600 + Number(minutes) * 60 + Number(seconds);
+    if (durationSeconds === null || total <= durationSeconds) return total;
+  }
+  return null;
+}
+
+async function fetchTopComments(videoId, durationSeconds) {
+  if (typeof YOUTUBE_API_KEY === "undefined") {
+    throw new Error(
+      "YOUTUBE_API_KEY is missing from config.js. Declare it as its own `const YOUTUBE_API_KEY = \"...\";`, not inside FIREBASE_CONFIG."
+    );
+  }
+
+  const params = new URLSearchParams({
+    part: "snippet",
+    videoId,
+    maxResults: "100",
+    order: "relevance",
+    textFormat: "plainText",
+    key: YOUTUBE_API_KEY,
+  });
+  const res = await fetch(`https://www.googleapis.com/youtube/v3/commentThreads?${params}`);
+  if (!res.ok) {
+    const body = await res.json().catch(() => null);
+    throw new Error(`comments request failed: ${res.status} ${body?.error?.message ?? ""}`);
+  }
+  const data = await res.json();
+
+  return data.items.map((item) => {
+    const comment = item.snippet.topLevelComment.snippet;
+    return {
+      id: item.id,
+      author: comment.authorDisplayName,
+      text: comment.textDisplay,
+      timestamp: firstTimestampSeconds(comment.textDisplay, durationSeconds),
+      likeCount: comment.likeCount,
+      replyCount: item.snippet.totalReplyCount,
+      publishedAt: comment.publishedAt,
+    };
+  });
+}
+
+// PATCH only replaces the listed children, so other data under the video (e.g. communityNotes) is untouched.
+async function updateVideo(videoId, fields) {
   const idToken = await getIdToken();
-  const url = `${FIREBASE_CONFIG.databaseURL}/videos/${videoId}/transcript.json?auth=${encodeURIComponent(idToken)}`;
+  const url = `${FIREBASE_CONFIG.databaseURL}/videos/${videoId}.json?auth=${encodeURIComponent(idToken)}`;
   const res = await fetch(url, {
-    method: "PUT",
+    method: "PATCH",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ ...transcript, fetchedAt: Date.now() }),
+    body: JSON.stringify(fields),
   });
   if (!res.ok) throw new Error(`database write failed: ${res.status} ${await res.text()}`);
 }
 
+async function saveVideo({ videoId, durationSeconds, transcript, chapters }) {
+  if (!VIDEO_ID_PATTERN.test(videoId)) throw new Error(`invalid video id: ${videoId}`);
+
+  const fields = {};
+  const result = {};
+  if (transcript) fields.transcript = { ...transcript, fetchedAt: Date.now() };
+  // A "chapters/creator" path key updates only that child, leaving chapters/generated alone.
+  // Writing null deletes stale chapters if the creator has since removed them.
+  if (chapters) {
+    fields["chapters/creator"] = chapters.length > 0 ? { fetchedAt: Date.now(), items: chapters } : null;
+  }
+
+  try {
+    const items = await fetchTopComments(videoId, durationSeconds);
+    fields.comments = { fetchedAt: Date.now(), items };
+    result.commentCount = items.length;
+  } catch (err) {
+    result.commentsError = err.message;
+  }
+
+  if (Object.keys(fields).length > 0) await updateVideo(videoId, fields);
+  return result;
+}
+
 chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
-  if (message.type !== "saveTranscript") return;
-  saveTranscript(message.transcript).then(
-    () => sendResponse({ ok: true }),
+  if (message.type !== "saveVideo") return;
+  saveVideo(message).then(
+    (result) => sendResponse({ ok: true, ...result }),
     (err) => sendResponse({ ok: false, error: err.message })
   );
   return true;
