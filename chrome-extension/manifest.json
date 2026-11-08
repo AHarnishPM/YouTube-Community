@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "YouTube Community",
-  "version": "1.1.1",
+  "version": "1.1.3",
   "description": "Shows timestamped YouTube comments over the video at the moment they refer to.",
   "icons": {
     "16": "icons/icon16.png",

@@ -1,8 +1,8 @@
 // Everything drawn on the YouTube player: the comment overlay, a status line, markers above the progress bar,
 // and an on/off button in the player controls.
 
-const OVERLAY_LEAD_SECONDS = 5;
-const OVERLAY_LINGER_SECONDS = 5;
+const OVERLAY_LEAD_SECONDS = 2.5;
+const OVERLAY_LINGER_SECONDS = 5.5;
 // Longer comments stay up to this many extra seconds, about 1 second per 40 characters.
 const OVERLAY_MAX_EXTRA_LINGER_SECONDS = 5;
 const OVERLAY_MAX_VISIBLE = 3;
@@ -114,9 +114,15 @@ function rebuildEntries() {
   renderOverlay(getVideo()?.currentTime ?? 0);
 }
 
-// Only comments with a timestamp are displayed. Passing [] clears the overlay.
+// False for comments that are only timestamps, like "1:30" or "2:15!!". The server stops saving these, but
+// older saved copies may still have some.
+function hasTextBesidesTimestamps(text) {
+  return text.replace(OVERLAY_TIMESTAMP_PATTERN, "").replace(/[\s\p{P}]/gu, "").length > 0;
+}
+
+// Only comments with a timestamp and some other text are displayed. Passing [] clears the overlay.
 function setOverlayComments(comments) {
-  videoComments = comments.filter((c) => typeof c.timestamp === "number");
+  videoComments = comments.filter((c) => typeof c.timestamp === "number" && hasTextBesidesTimestamps(c.text));
   rebuildEntries();
 }
 

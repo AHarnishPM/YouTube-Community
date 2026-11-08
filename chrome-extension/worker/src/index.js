@@ -4,7 +4,12 @@ import privacyPolicy from "./privacy.html";
 
 const VIDEO_PATH = /^\/videos\/([A-Za-z0-9_-]{11})(\/content|\/notes)?$/;
 
-const COMMENTS_REFRESH_MS = 3 * 60 * 60 * 1000;
+// How often comments are refreshed, by the video's age: new videos get comments quickly, so refresh them more.
+const COMMENTS_REFRESH_SCHEDULE = [
+  { videoAgeUnder: 60 * 60 * 1000, refreshEvery: 5 * 60 * 1000 }, // first hour: every 5 minutes
+  { videoAgeUnder: 24 * 60 * 60 * 1000, refreshEvery: 30 * 60 * 1000 }, // first day: every 30 minutes
+];
+const COMMENTS_REFRESH_MS = 3 * 60 * 60 * 1000; // after that: every 3 hours
 // A full rescan re-reads every comment, picking up new like counts and dropping deleted comments. Between
 // full rescans, refreshes only add newly posted comments. YouTube's API policies also require stored API data
 // to be refreshed or deleted within 30 days (see deleteExpiredData).
@@ -161,14 +166,25 @@ async function youtube(env, resource, params) {
   return data;
 }
 
-// Resolves to undefined if the video doesn't exist, or null if it has no fixed length (live streams).
-async function fetchDuration(env, videoId) {
-  const data = await youtube(env, "videos", { part: "contentDetails", id: videoId, fields: "items(contentDetails/duration)" });
-  const iso = data.items?.[0]?.contentDetails?.duration;
-  if (iso === undefined) return undefined;
+// Resolves to undefined if the video doesn't exist. durationSeconds is null if it has no fixed length (live
+// streams). Asking for both parts still costs 1 quota unit.
+async function fetchVideoDetails(env, videoId) {
+  const data = await youtube(env, "videos", {
+    part: "contentDetails,snippet",
+    id: videoId,
+    fields: "items(contentDetails/duration,snippet/publishedAt)",
+  });
+  const item = data.items?.[0];
+  if (!item) return undefined;
+  const iso = item.contentDetails?.duration ?? "";
   const [, days, hours, minutes, seconds] = iso.match(/^P(?:(\d+)D)?(?:T(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?)?$/) ?? [];
   const total = Number(days ?? 0) * 86400 + Number(hours ?? 0) * 3600 + Number(minutes ?? 0) * 60 + Number(seconds ?? 0);
-  return total || null;
+  return { durationSeconds: total || null, videoPublishedAt: Date.parse(item.snippet?.publishedAt) || null };
+}
+
+function commentsRefreshMs(videoPublishedAt, now) {
+  const age = videoPublishedAt ? now - videoPublishedAt : Infinity;
+  return COMMENTS_REFRESH_SCHEDULE.find((step) => age < step.videoAgeUnder)?.refreshEvery ?? COMMENTS_REFRESH_MS;
 }
 
 // Matches m:ss, mm:ss, mmm:ss, and h:mm:ss, but not pieces of longer runs like 1:2:3:45.
@@ -182,6 +198,11 @@ function firstTimestampSeconds(text, durationSeconds) {
     if (durationSeconds === null || total <= durationSeconds) return total;
   }
   return null;
+}
+
+// False for comments that are only timestamps, like "1:30" or "2:15!!", which say nothing on screen.
+function hasTextBesidesTimestamps(text) {
+  return text.replace(TIMESTAMP_PATTERN, "").replace(/[\s\p{P}]/gu, "").length > 0;
 }
 
 // One page is up to 100 top-level comments, newest first, and costs 1 quota unit. Only comments published at
@@ -215,7 +236,7 @@ async function fetchCommentsPage(env, videoId, durationSeconds, pageToken, since
         publishedAt: comment.publishedAt,
       };
     })
-    .filter((c) => c.timestamp !== null);
+    .filter((c) => c.timestamp !== null && hasTextBesidesTimestamps(c.text));
 
   return { comments, scanned: newItems.length, reachedSince: newItems.length < items.length, nextPageToken: data.nextPageToken ?? null };
 }
@@ -226,8 +247,9 @@ async function fetchCommentsPage(env, videoId, durationSeconds, pageToken, since
 const asList = (value) => (Array.isArray(value) ? value : Object.values(value ?? {}));
 const mergeById = (...lists) => [...new Map(lists.flatMap(asList).map((c) => [c.id, c])).values()];
 
-// Returns the saved timestamped comments, refreshing them first if they're over 3 hours old.
+// Returns the saved timestamped comments, refreshing them first if they're due (see COMMENTS_REFRESH_SCHEDULE).
 // scanning: true means the scan isn't finished and the extension should call again for more.
+// nextRefreshAt: when asking again could bring new comments, so the extension can check while the video plays.
 async function getVideo(env, videoId, ip) {
   const [storedComments, storedScan, expiry] = await Promise.all([
     db(env, "GET", `videos/${videoId}/comments`),
@@ -237,25 +259,39 @@ async function getVideo(env, videoId, ip) {
   // Comments saved before the Worker existed have no fullScanAt; rescan them.
   const stored = storedComments?.fullScanAt === undefined ? null : storedComments;
   const now = Date.now();
-  const view = (scan) => ({
-    comments: mergeById(stored?.items, scan?.items),
+  const view = (scan, saved = stored) => ({
+    comments: mergeById(saved?.items, scan?.items),
     scanning: Boolean(scan),
+    nextRefreshAt: saved && !scan ? saved.fetchedAt + commentsRefreshMs(saved.videoPublishedAt, now) : null,
     transcriptFetchedAt: expiry?.transcript ?? null,
     chaptersFetchedAt: expiry?.chapters ?? null,
   });
 
   let scan = storedScan && now - storedScan.updatedAt < ABANDONED_SCAN_MS ? storedScan : null;
   if (!scan) {
-    if (stored && now - stored.fetchedAt < COMMENTS_REFRESH_MS) return view(null);
+    if (stored && now - stored.fetchedAt < commentsRefreshMs(stored.videoPublishedAt, now)) return view(null);
     const full = !stored || now - stored.fullScanAt > FULL_RESCAN_MS;
     // Full scans are the expensive kind (up to 100 quota units), so they get their own tighter limit.
     if (full && !(await allowed(env.SCAN_LIMITER, ip))) return view(null);
     if (!(await hasQuota(env))) return view(null);
 
-    const durationSeconds = full || stored.durationSeconds === undefined ? await fetchDuration(env, videoId) : stored.durationSeconds;
-    if (durationSeconds === undefined) throw new HttpError(404, "video not found");
-    await spendQuota(env, 1);
-    scan = { startedAt: now, full, sinceMs: full ? 0 : stored.fetchedAt - CLOCK_SKEW_MS, durationSeconds, pages: 0, scanned: 0, items: [] };
+    // Comments saved before publish dates were tracked have no videoPublishedAt, so look it up once.
+    let details = { durationSeconds: stored?.durationSeconds ?? null, videoPublishedAt: stored?.videoPublishedAt };
+    if (full || !details.videoPublishedAt) {
+      details = await fetchVideoDetails(env, videoId);
+      if (details === undefined) throw new HttpError(404, "video not found");
+      await spendQuota(env, 1);
+    }
+    scan = {
+      startedAt: now,
+      full,
+      sinceMs: full ? 0 : stored.fetchedAt - CLOCK_SKEW_MS,
+      durationSeconds: details.durationSeconds,
+      videoPublishedAt: details.videoPublishedAt,
+      pages: 0,
+      scanned: 0,
+      items: [],
+    };
   } else if (!(await hasQuota(env))) {
     return view(null);
   }
@@ -293,6 +329,7 @@ async function getVideo(env, videoId, ip) {
     fetchedAt: scan.startedAt,
     fullScanAt,
     durationSeconds: scan.durationSeconds ?? null,
+    videoPublishedAt: scan.videoPublishedAt ?? null,
     scannedCount: scan.full ? scan.scanned : stored.scannedCount + scan.scanned,
     items: scan.full ? scan.items : mergeById(stored.items, scan.items),
   };
@@ -302,7 +339,7 @@ async function getVideo(env, videoId, ip) {
     [`expiry/${videoId}/comments`]: fullScanAt,
     [`expiry/${videoId}/commentScan`]: null,
   });
-  return { ...view(null), comments: saved.items };
+  return view(null, saved);
 }
 
 async function hasQuota(env) {

@@ -5,6 +5,9 @@
   const CONTENT_REFRESH_MS = 24 * 60 * 60 * 1000;
   // A long first scan of a video's comments is done over several requests; this is a safety cap.
   const MAX_SCAN_CALLS = 15;
+  // Never check for new comments more often than this, even if a refresh is overdue (e.g. rate-limited).
+  const MIN_CHECK_DELAY_MS = 60 * 1000;
+  let commentsCheckTimer = null;
 
   function formatTime(seconds) {
     const m = Math.floor(seconds / 60);
@@ -37,24 +40,40 @@
 
   // The server returns saved comments and refreshes them from YouTube when they're over 3 hours old.
   // A first scan of a busy video takes several calls; comments are shown as each one returns.
-  async function loadComments(videoId) {
+  // quiet: a background check while the video plays, so no status messages.
+  async function loadComments(videoId, { quiet = false } = {}) {
     let video;
     let calls = 0;
-    setOverlayStatus("Loading comments\u2026");
+    if (!quiet) setOverlayStatus("Loading comments\u2026");
     do {
       video = await callBackground("getVideo", { videoId });
       if (videoId !== lastVideoId) return undefined;
       setOverlayComments(video.comments);
-      if (video.scanning) setOverlayStatus(`Loading comments\u2026 ${video.comments.length} found so far`);
+      if (video.scanning && !quiet) setOverlayStatus(`Loading comments\u2026 ${video.comments.length} found so far`);
       calls++;
     } while (video.scanning && calls < MAX_SCAN_CALLS);
     const count = video.comments.length;
-    setOverlayStatus(
-      count === 0 ? "No timestamped comments on this video" : `${count} timestamped comment${count === 1 ? "" : "s"}`,
-      4000
-    );
+    if (!quiet) {
+      setOverlayStatus(
+        count === 0 ? "No timestamped comments on this video" : `${count} timestamped comment${count === 1 ? "" : "s"}`,
+        4000
+      );
+    }
     console.log(`[YouTube Community] ${count} timestamped comments for ${videoId}`);
+    scheduleCommentsCheck(videoId, video.nextRefreshAt);
     return video;
+  }
+
+  // New videos get refreshed comments every few minutes, so check back while the video is open.
+  function scheduleCommentsCheck(videoId, nextRefreshAt) {
+    clearTimeout(commentsCheckTimer);
+    if (!nextRefreshAt) return;
+    // The random part spreads out viewers of the same video; only the first one's check reaches YouTube.
+    const delay = Math.max(MIN_CHECK_DELAY_MS, nextRefreshAt - Date.now()) + Math.random() * 20000;
+    commentsCheckTimer = setTimeout(() => {
+      const stillWatching = location.pathname === "/watch" && new URLSearchParams(location.search).get("v") === videoId;
+      if (stillWatching && videoId === lastVideoId) attempt("new comments", videoId, () => loadComments(videoId, { quiet: true }));
+    }, delay);
   }
 
   // Reads the transcript and chapters in this browser and sends them to the server to share.
@@ -99,6 +118,7 @@
     if (location.pathname !== "/watch" || !videoId || videoId === lastVideoId) return;
     if (!(await hasConsent())) return;
     lastVideoId = videoId;
+    clearTimeout(commentsCheckTimer);
     setOverlayComments([]);
     setOverlayStatus(null);
 
@@ -122,6 +142,7 @@
       syncVideo();
     } else {
       lastVideoId = null;
+      clearTimeout(commentsCheckTimer);
       setOverlayComments([]);
       setOverlayStatus(null);
     }
