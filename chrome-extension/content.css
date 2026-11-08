@@ -48,6 +48,18 @@
   align-items: flex-end;
 }
 
+/* After dragging: left and top are set on the element; it's centered on that point and grows downward. */
+.ytc-overlay[data-vertical="custom"] {
+  bottom: auto;
+  transform: translateX(-50%);
+  align-items: center;
+  transition: none;
+}
+
+.ytc-overlay.ytc-dragging .ytc-overlay-comment {
+  cursor: grabbing;
+}
+
 /* The miniplayer and other small players are too small for comments. */
 .ytp-player-minimized .ytc-overlay,
 .ytp-small-mode .ytc-overlay,
@@ -185,6 +197,55 @@ ytd-miniplayer .ytc-overlay {
 
 .ytp-player-minimized .ytc-marker-preview,
 .ytp-small-mode .ytc-marker-preview {
+  display: none;
+}
+
+/* ---------- First-run hint ---------- */
+
+.ytc-hint {
+  --ytc-arrow-left: 50%;
+  position: absolute;
+  /* Above YouTube's own tooltips and thumbnail previews. */
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+  width: 260px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: #fff;
+  color: #0f0f0f;
+  font-family: "YouTube Noto Sans", Roboto, Arial, sans-serif;
+  font-size: 13px;
+  line-height: 1.35;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
+  animation: ytc-fade-in 0.3s ease;
+}
+
+.ytc-hint::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: var(--ytc-arrow-left);
+  transform: translateX(-50%);
+  border: 7px solid transparent;
+  border-top-color: #fff;
+}
+
+.ytc-hint button {
+  padding: 5px 12px;
+  border: 0;
+  border-radius: 14px;
+  background: #0f0f0f;
+  color: #fff;
+  font: inherit;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.ytp-player-minimized .ytc-hint,
+.ytp-small-mode .ytc-hint {
   display: none;
 }
 

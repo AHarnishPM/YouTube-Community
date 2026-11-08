@@ -74,7 +74,7 @@
         grid-template-rows: 1fr 1fr;
         gap: 4px;
         height: 64px;
-        margin-bottom: 14px;
+        margin-bottom: 4px;
         padding: 6px;
         border-radius: 8px;
         background: #282828;
@@ -170,6 +170,13 @@
       <button data-position="bottom-center" aria-label="Bottom center"></button>
       <button data-position="bottom-right" aria-label="Bottom right"></button>
     </div>
+    <p class="hint position-hint">Or drag a comment on the video to put them anywhere.</p>
+
+    <label for="lead-seconds">Appear <span class="value" id="lead-seconds-value"></span></label>
+    <input id="lead-seconds" type="range" min="0" max="10" step="0.5" />
+
+    <label for="linger-seconds">Stay until <span class="value" id="linger-seconds-value"></span></label>
+    <input id="linger-seconds" type="range" min="1" max="15" step="0.5" />
 
     <label for="top-percent">Comments shown <span class="value" id="top-percent-value"></span></label>
     <input id="top-percent" type="range" min="10" max="100" step="5" />

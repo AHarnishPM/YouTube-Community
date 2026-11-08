@@ -6,6 +6,8 @@ const sliders = {
   topPercent: { id: "top-percent", format: (v) => (v >= 100 ? "All" : `Top ${v}% by likes`) },
   fontSize: { id: "font-size", format: (v) => `${v}px` },
   backgroundOpacity: { id: "background-opacity", format: (v) => `${v}%` },
+  leadSeconds: { id: "lead-seconds", format: (v) => (v === 0 ? "at the timestamp" : `${v}s before the timestamp`) },
+  lingerSeconds: { id: "linger-seconds", format: (v) => `${v}s after the timestamp` },
 };
 
 function showPreview(key, value) {
@@ -21,11 +23,14 @@ function showSlider(key, value) {
 }
 
 function showPosition(position) {
+  // "custom" (set by dragging on the video) matches none of the buttons.
+  let label = "Custom";
   for (const button of positionButtons) {
     const selected = button.dataset.position === position;
     button.setAttribute("aria-pressed", String(selected));
-    if (selected) document.getElementById("position-value").textContent = button.getAttribute("aria-label");
+    if (selected) label = button.getAttribute("aria-label");
   }
+  document.getElementById("position-value").textContent = label;
 }
 
 chrome.storage.sync.get(DEFAULT_SETTINGS, (settings) => {
@@ -53,7 +58,9 @@ enabledBox.addEventListener("change", () => chrome.storage.sync.set({ overlayEna
 
 // The player button and keyboard shortcut can change this while the popup is open.
 chrome.storage.onChanged.addListener((changes, area) => {
-  if (area === "sync" && changes.overlayEnabled) enabledBox.checked = changes.overlayEnabled.newValue;
+  if (area !== "sync") return;
+  if (changes.overlayEnabled) enabledBox.checked = changes.overlayEnabled.newValue;
+  if (changes.position) showPosition(changes.position.newValue);
 });
 
 document.getElementById("privacy-link").href = `${WORKER_URL}/privacy`;

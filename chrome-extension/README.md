@@ -126,15 +126,15 @@ Each note gets its own unique ID, so running the script twice adds the notes twi
 
 - `manifest.json`, `icons/` — extension definition and icons.
 - `welcome.html` / `welcome.js` — opens on install; the extension does nothing until the user accepts the privacy policy and YouTube's Terms of Service.
-- `popup.html` / `popup.js` — settings: show or hide comments, position (top or bottom; left, center, or right), which comments to show (all, down to the top 10% by likes), size, and background darkness. Also links to the policies and a switch to turn the extension off.
+- `popup.html` / `popup.js` — settings: show or hide comments, position (top or bottom; left, center, or right), how long before and after their timestamp comments show, which comments to show (all, down to the top 10% by likes), size, and background darkness. Also links to the policies and a switch to turn the extension off.
 - `settings.js` — the settings' default values, shared by the popup and the player.
 - `overlay.js` — everything drawn on the player:
-  - timestamped comments with their like counts, from 2.5 seconds before their timestamp until 5.5–10.5 seconds after (longer comments stay longer), up to 3 at once. A comment on screen isn't replaced until its time is up, so busy stretches don't flicker.
+  - timestamped comments with their like counts, from 2.5 seconds before their timestamp until 5.5–10.5 seconds after by default (adjustable in the popup; longer comments stay longer), up to 3 at once. Dragging a comment moves them anywhere on the player. A comment on screen isn't replaced until its time is up, so busy stretches don't flicker.
   - comments that list several times ("0:00 intro / 2:15 the drop") are split so each part shows at its own time.
   - hovering a comment keeps it on screen and shows all of it; clicking it pauses the video and opens the comment on YouTube in a new tab.
   - a status line ("Loading comments…", "No timestamped comments on this video").
   - markers above the progress bar showing where comments are (taller means more). Hovering near one previews its most-liked comments above YouTube's thumbnail preview.
-  - a bubble button in the player controls, and the <kbd>B</kbd> key, to show or hide comments. Hidden in the miniplayer.
+  - a bubble button in the player controls, and the <kbd>B</kbd> key, to show or hide comments. Hidden in the miniplayer. The first time the extension runs after being turned on, a hint points it out.
 - `content.js` / `content.css` — runs on YouTube watch pages: loads comments, reads the transcript and chapters when they're due for a refresh (logging them to the page's DevTools console), and sends them to be saved.
 - `youtube.js` — reads YouTube's internal APIs: the video's length, its caption track, and its chapters.
 - `background.js` — relays requests from YouTube pages to the Worker.

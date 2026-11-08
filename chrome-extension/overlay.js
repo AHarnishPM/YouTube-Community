@@ -1,8 +1,7 @@
 // Everything drawn on the YouTube player: the comment overlay, a status line, markers above the progress bar,
 // and an on/off button in the player controls.
 
-const OVERLAY_LEAD_SECONDS = 2.5;
-const OVERLAY_LINGER_SECONDS = 5.5;
+// How long comments stay on screen is a user setting (leadSeconds and lingerSeconds in settings.js).
 // Longer comments stay up to this many extra seconds, about 1 second per 40 characters.
 const OVERLAY_MAX_EXTRA_LINGER_SECONDS = 5;
 const OVERLAY_MAX_VISIBLE = 3;
@@ -150,9 +149,12 @@ function getOverlay() {
 function applySettings() {
   const overlay = getPlayer()?.querySelector(".ytc-overlay");
   if (overlay) {
-    const [vertical, horizontal] = settings.position.split("-");
+    const custom = settings.position === "custom";
+    const [vertical, horizontal] = custom ? ["custom", "custom"] : settings.position.split("-");
     overlay.dataset.vertical = vertical;
     overlay.dataset.horizontal = horizontal;
+    overlay.style.left = custom ? `${settings.customX * 100}%` : "";
+    overlay.style.top = custom ? `${settings.customY * 100}%` : "";
     overlay.hidden = !settings.overlayEnabled;
     overlay.style.setProperty("--ytc-font-size", `${settings.fontSize}px`);
     overlay.style.setProperty("--ytc-bg-opacity", settings.backgroundOpacity / 100);
@@ -163,7 +165,7 @@ function applySettings() {
 }
 
 function lingerSeconds(entry) {
-  return OVERLAY_LINGER_SECONDS + Math.min(OVERLAY_MAX_EXTRA_LINGER_SECONDS, entry.text.length / 40);
+  return settings.lingerSeconds + Math.min(OVERLAY_MAX_EXTRA_LINGER_SECONDS, entry.text.length / 40);
 }
 
 function openComment(entry) {
@@ -176,7 +178,7 @@ function createOverlayItem(entry) {
   const item = document.createElement("div");
   item.className = "ytc-overlay-comment";
   item.dataset.id = entry.id;
-  item.title = "Open this comment on YouTube";
+  item.title = "Click to open on YouTube, or drag to move";
 
   const author = document.createElement("div");
   author.className = "ytc-overlay-author";
@@ -191,8 +193,68 @@ function createOverlayItem(entry) {
   for (const type of ["mousedown", "mouseup", "pointerdown", "pointerup", "click", "dblclick"]) {
     item.addEventListener(type, (event) => event.stopPropagation());
   }
-  item.addEventListener("click", () => openComment(entry));
+  item.addEventListener("pointerdown", (event) => {
+    if (event.button === 0) startDrag(event, () => openComment(entry));
+  });
   return item;
+}
+
+// ---------- Dragging the comments ----------
+
+// How far (in pixels) the mouse must move before a press becomes a drag instead of a click.
+const DRAG_THRESHOLD_PX = 4;
+
+// Dragging any comment moves the whole overlay; letting go saves the spot. A press without movement is a click.
+function startDrag(downEvent, onClick) {
+  const player = getPlayer();
+  const overlay = player?.querySelector(".ytc-overlay");
+  if (!overlay) return;
+  const playerRect = player.getBoundingClientRect();
+  const overlayRect = overlay.getBoundingClientRect();
+  // Where the overlay's center-top point was, relative to the player.
+  const startX = overlayRect.left + overlayRect.width / 2 - playerRect.left;
+  const startY = overlayRect.top - playerRect.top;
+  let dragging = false;
+  let position = null;
+
+  function move(event) {
+    const dx = event.clientX - downEvent.clientX;
+    const dy = event.clientY - downEvent.clientY;
+    if (!dragging && Math.hypot(dx, dy) < DRAG_THRESHOLD_PX) return;
+    if (!dragging) {
+      dragging = true;
+      overlay.classList.add("ytc-dragging");
+      overlay.dataset.vertical = "custom";
+      overlay.dataset.horizontal = "custom";
+    }
+    // Keep the whole overlay inside the player.
+    const half = overlay.offsetWidth / 2;
+    const x = Math.min(Math.max(startX + dx, half), playerRect.width - half);
+    const y = Math.min(Math.max(startY + dy, 0), playerRect.height - overlay.offsetHeight);
+    position = { customX: x / playerRect.width, customY: y / playerRect.height };
+    overlay.style.left = `${position.customX * 100}%`;
+    overlay.style.top = `${position.customY * 100}%`;
+  }
+
+  function end(event) {
+    document.removeEventListener("pointermove", move, true);
+    document.removeEventListener("pointerup", end, true);
+    overlay.classList.remove("ytc-dragging");
+    event.stopPropagation();
+    if (!dragging) {
+      onClick();
+      return;
+    }
+    // Letting go over the video would otherwise count as a click on the player and pause or play it.
+    document.addEventListener("click", (click) => click.stopPropagation(), { capture: true, once: true });
+    if (position) {
+      Object.assign(settings, { position: "custom", ...position });
+      chrome.storage.sync.set({ position: "custom", ...position });
+    }
+  }
+
+  document.addEventListener("pointermove", move, true);
+  document.addEventListener("pointerup", end, true);
 }
 
 function removeItem(item) {
@@ -207,7 +269,7 @@ function renderOverlay(currentTime) {
   // During ads, currentTime belongs to the ad rather than the video.
   const showing = settings.overlayEnabled && !adShowing();
   const inWindow = (entry) =>
-    currentTime >= entry.timestamp - OVERLAY_LEAD_SECONDS && currentTime < entry.timestamp + lingerSeconds(entry);
+    currentTime >= entry.timestamp - settings.leadSeconds && currentTime < entry.timestamp + lingerSeconds(entry);
   const byId = new Map(overlayEntries.map((entry) => [entry.id, entry]));
 
   // A comment on screen stays until its time is up, even if a more-liked one comes along, so busy stretches
@@ -419,6 +481,53 @@ function ensureToggleButton(player) {
   });
   controls.prepend(button);
   updateToggleButton();
+  showFirstRunHint(player, button);
+}
+
+// ---------- First-run hint ----------
+
+const HINT_SHOWN_KEY = "firstRunHintShown";
+const HINT_SHOW_MS = 12000;
+
+// Once per install, after the user turns the extension on, points out the player button.
+async function showFirstRunHint(player, button) {
+  if (!(await hasConsent())) return;
+  const { [HINT_SHOWN_KEY]: shown } = await chrome.storage.local.get(HINT_SHOWN_KEY);
+  if (shown || player.querySelector(".ytc-hint")) return;
+  await chrome.storage.local.set({ [HINT_SHOWN_KEY]: true });
+
+  const hint = document.createElement("div");
+  hint.className = "ytc-hint";
+  const text = document.createElement("div");
+  text.textContent =
+    `Timestamped comments appear on the video. Press ${TOGGLE_SHORTCUT_KEY.toUpperCase()} or this button to hide them, ` +
+    "and drag a comment to move them anywhere.";
+  const dismiss = document.createElement("button");
+  dismiss.textContent = "Got it";
+  hint.append(text, dismiss);
+  for (const type of ["mousedown", "mouseup", "pointerdown", "pointerup", "click", "dblclick"]) {
+    hint.addEventListener(type, (event) => event.stopPropagation());
+  }
+  // Above the button, with the arrow pointing at it. YouTube can still be rearranging its buttons (and the player
+  // can resize), so this repeats while the hint is up.
+  const place = () => {
+    const playerRect = player.getBoundingClientRect();
+    const buttonRect = button.getBoundingClientRect();
+    const buttonCenter = buttonRect.left + buttonRect.width / 2 - playerRect.left;
+    const left = Math.min(Math.max(buttonCenter - hint.offsetWidth + 28, 12), playerRect.width - hint.offsetWidth - 12);
+    hint.style.left = `${left}px`;
+    hint.style.bottom = `${playerRect.bottom - buttonRect.top + 12}px`;
+    hint.style.setProperty("--ytc-arrow-left", `${buttonCenter - left}px`);
+  };
+  const placer = setInterval(place, 250);
+  const close = () => {
+    clearInterval(placer);
+    hint.remove();
+  };
+  dismiss.addEventListener("click", close);
+  setTimeout(close, HINT_SHOW_MS);
+  player.appendChild(hint);
+  place();
 }
 
 function updateToggleButton() {
