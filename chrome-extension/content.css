@@ -1,5 +1,8 @@
+/* ---------- Comment overlay ---------- */
+
 .ytc-overlay {
   --ytc-font-size: 16px;
+  --ytc-bg-opacity: 0.6;
   position: absolute;
   top: 12px;
   left: 50%;
@@ -14,18 +17,59 @@
   pointer-events: none;
   font-family: "YouTube Noto Sans", Roboto, Arial, sans-serif;
   font-size: var(--ytc-font-size);
-  transition: top 0.25s ease;
+  transition: bottom 0.25s ease;
+}
+
+.ytc-overlay[hidden] {
+  display: none;
+}
+
+.ytc-overlay[data-vertical="bottom"] {
+  top: auto;
+  /* Above the controls while they're showing, lower when they hide. */
+  bottom: 64px;
+  flex-direction: column-reverse;
+}
+
+.ytp-autohide .ytc-overlay[data-vertical="bottom"] {
+  bottom: 16px;
+}
+
+.ytc-overlay[data-horizontal="left"] {
+  left: 12px;
+  transform: none;
+  align-items: flex-start;
+}
+
+.ytc-overlay[data-horizontal="right"] {
+  left: auto;
+  right: 12px;
+  transform: none;
+  align-items: flex-end;
+}
+
+/* The miniplayer and other small players are too small for comments. */
+.ytp-player-minimized .ytc-overlay,
+.ytp-small-mode .ytc-overlay,
+ytd-miniplayer .ytc-overlay {
+  display: none;
 }
 
 .ytc-overlay-comment {
   max-width: 100%;
   padding: 0.4em 0.75em;
   border-radius: 0.6em;
-  background-color: rgba(0, 0, 0, 0.6);
+  background-color: rgba(0, 0, 0, var(--ytc-bg-opacity));
   color: #fff;
   line-height: 1.3;
+  pointer-events: auto;
+  cursor: pointer;
   animation: ytc-fade-in 0.3s ease;
-  transition: opacity 0.3s ease;
+  transition: opacity 0.3s ease, background-color 0.15s ease;
+}
+
+.ytc-overlay-comment:hover {
+  background-color: rgba(0, 0, 0, max(var(--ytc-bg-opacity), 0.85));
 }
 
 .ytc-overlay-comment.ytc-leaving {
@@ -44,10 +88,114 @@
   line-clamp: 2;
   overflow: hidden;
   overflow-wrap: anywhere;
+  white-space: pre-line;
+}
+
+/* Hovering shows the whole comment. */
+.ytc-overlay-comment:hover .ytc-overlay-text {
+  display: block;
+  max-height: 12em;
+  overflow-y: auto;
+}
+
+.ytc-status {
+  padding: 0.25em 0.7em;
+  border-radius: 1em;
+  background-color: rgba(0, 0, 0, var(--ytc-bg-opacity));
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.7em;
+}
+
+.ytc-status[hidden] {
+  display: none;
 }
 
 @keyframes ytc-fade-in {
   from {
     opacity: 0;
   }
+}
+
+/* ---------- Progress bar markers ---------- */
+
+.ytc-markers {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 100%;
+  height: 14px;
+  pointer-events: none;
+}
+
+.ad-showing .ytc-markers {
+  display: none;
+}
+
+.ytc-marker {
+  position: absolute;
+  bottom: 3px;
+  width: 3px;
+  transform: translateX(-50%);
+  border-radius: 1.5px;
+  background-color: rgba(255, 255, 255, 0.75);
+}
+
+.ytc-marker.ytc-marker-active {
+  width: 5px;
+  background-color: #fff;
+}
+
+/* ---------- Marker previews ---------- */
+
+.ytc-marker-preview {
+  --ytc-bg-opacity: 0.6;
+  position: absolute;
+  z-index: 70;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: max-content;
+  max-width: min(320px, 70%);
+  padding: 8px 10px;
+  border-radius: 8px;
+  background-color: rgba(0, 0, 0, max(var(--ytc-bg-opacity), 0.8));
+  color: #fff;
+  font-family: "YouTube Noto Sans", Roboto, Arial, sans-serif;
+  font-size: 13px;
+  line-height: 1.3;
+  pointer-events: none;
+  animation: ytc-fade-in 0.15s ease;
+}
+
+.ytc-marker-preview-text {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+  white-space: pre-line;
+}
+
+.ytc-marker-preview-more {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 11px;
+}
+
+.ytp-player-minimized .ytc-marker-preview,
+.ytp-small-mode .ytc-marker-preview {
+  display: none;
+}
+
+/* ---------- On/off button ---------- */
+
+.ytc-toggle-button svg {
+  padding: 18%;
+  box-sizing: border-box;
+}
+
+.ytc-toggle-button[aria-pressed="true"] .ytc-toggle-slash,
+.ytc-toggle-button[aria-pressed="false"] .ytc-toggle-dots {
+  display: none;
 }

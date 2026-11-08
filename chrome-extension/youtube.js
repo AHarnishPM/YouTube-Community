@@ -58,9 +58,22 @@ function findKey(node, key) {
   return undefined;
 }
 
-// Resolves to [] when the creator didn't add chapters. YouTube's auto-generated chapters
-// live under a different marker key and are deliberately excluded.
-async function fetchCreatorChapters(videoId, durationSeconds) {
+function chaptersForMarkerKey(markersMap, key, durationSeconds) {
+  const markers = markersMap.find((m) => m.key === key);
+  const starts = (markers?.value?.chapters ?? []).map((c) => ({
+    title: c.chapterRenderer.title.simpleText,
+    start: c.chapterRenderer.timeRangeStartMillis / 1000,
+  }));
+
+  return starts.map((chapter, i) => {
+    const end = starts[i + 1]?.start ?? durationSeconds;
+    return end === null ? chapter : { ...chapter, duration: Math.round((end - chapter.start) * 1000) / 1000 };
+  });
+}
+
+// creator: chapters written in the video's description. auto: chapters YouTube generated.
+// Either is [] when the video doesn't have that kind.
+async function fetchChapters(videoId, durationSeconds) {
   const res = await fetch("/youtubei/v1/next?prettyPrint=false", {
     method: "POST",
     credentials: "omit",
@@ -70,14 +83,9 @@ async function fetchCreatorChapters(videoId, durationSeconds) {
   if (!res.ok) throw new Error(`next request failed: ${res.status}`);
   const data = await res.json();
 
-  const markers = (findKey(data, "markersMap") ?? []).find((m) => m.key === "DESCRIPTION_CHAPTERS");
-  const starts = (markers?.value?.chapters ?? []).map((c) => ({
-    title: c.chapterRenderer.title.simpleText,
-    start: c.chapterRenderer.timeRangeStartMillis / 1000,
-  }));
-
-  return starts.map((chapter, i) => {
-    const end = starts[i + 1]?.start ?? durationSeconds;
-    return end === null ? chapter : { ...chapter, duration: end - chapter.start };
-  });
+  const markersMap = findKey(data, "markersMap") ?? [];
+  return {
+    creator: chaptersForMarkerKey(markersMap, "DESCRIPTION_CHAPTERS", durationSeconds),
+    auto: chaptersForMarkerKey(markersMap, "AUTO_CHAPTERS", durationSeconds),
+  };
 }

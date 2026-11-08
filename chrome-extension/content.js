@@ -1,6 +1,11 @@
 (function () {
   let lastVideoId = null;
 
+  // Transcripts and chapters change rarely, so they're re-read from YouTube at most once a day.
+  const CONTENT_REFRESH_MS = 24 * 60 * 60 * 1000;
+  // A long first scan of a video's comments is done over several requests; this is a safety cap.
+  const MAX_SCAN_CALLS = 15;
+
   function formatTime(seconds) {
     const m = Math.floor(seconds / 60);
     const s = Math.floor(seconds % 60).toString().padStart(2, "0");
@@ -9,11 +14,15 @@
 
   async function callBackground(type, payload) {
     const response = await chrome.runtime.sendMessage({ type, ...payload });
+    // No response means the running background worker doesn't know this message type, i.e. it's an older version.
+    if (response === undefined) {
+      throw new Error(`The background worker didn't handle "${type}". Reload the extension in chrome://extensions, then refresh this tab.`);
+    }
     if (!response.ok) throw new Error(response.error);
     return response.value;
   }
 
-  // Resolves to undefined on failure, which tells the background worker to keep the previously saved copy.
+  // Resolves to undefined on failure.
   async function attempt(label, videoId, fn) {
     try {
       return await fn();
@@ -24,123 +33,78 @@
     }
   }
 
-  // Each page is 100 comments and 1 unit of the 10,000-unit daily YouTube quota, so cap very popular videos.
-  const MAX_COMMENT_PAGES = 100;
-  const COMMENTS_REFRESH_MS = 3 * 60 * 60 * 1000;
-  // Overlap the previous refresh slightly in case this computer's clock is behind YouTube's.
-  const CLOCK_SKEW_MS = 60 * 1000;
+  const isStale = (fetchedAt) => !fetchedAt || Date.now() - fetchedAt > CONTENT_REFRESH_MS;
 
-  // Fetches comments newest first, stopping once it reaches ones the stored copy already covers.
-  // With nothing stored, it scans everything (up to the page cap).
-  async function refreshComments(videoId, durationSeconds, stored) {
-    const startedAt = Date.now();
-    const sinceMs = stored ? stored.fetchedAt - CLOCK_SKEW_MS : null;
-    const byId = new Map((stored?.items ?? []).map((c) => [c.id, c]));
-    let newlyScanned = 0;
-    let pageToken = null;
-    let reachedSince = false;
-    let pages = 0;
+  // The server returns saved comments and refreshes them from YouTube when they're over 3 hours old.
+  // A first scan of a busy video takes several calls; comments are shown as each one returns.
+  async function loadComments(videoId) {
+    let video;
+    let calls = 0;
+    setOverlayStatus("Loading comments\u2026");
     do {
-      const page = await callBackground("fetchCommentsPage", { videoId, durationSeconds, pageToken, sinceMs });
+      video = await callBackground("getVideo", { videoId });
       if (videoId !== lastVideoId) return undefined;
-      for (const comment of page.comments) byId.set(comment.id, comment);
-      newlyScanned += page.scanned;
-      pageToken = page.nextPageToken;
-      reachedSince = page.reachedSince;
-      pages++;
-      setOverlayComments([...byId.values()]);
-    } while (pageToken && !reachedSince && pages < MAX_COMMENT_PAGES);
-
-    return {
-      saved: { fetchedAt: startedAt, scannedCount: (stored?.scannedCount ?? 0) + newlyScanned, items: [...byId.values()] },
-      newlyScanned,
-      pages,
-      hitPageCap: Boolean(pageToken) && !reachedSince,
-    };
+      setOverlayComments(video.comments);
+      if (video.scanning) setOverlayStatus(`Loading comments\u2026 ${video.comments.length} found so far`);
+      calls++;
+    } while (video.scanning && calls < MAX_SCAN_CALLS);
+    const count = video.comments.length;
+    setOverlayStatus(
+      count === 0 ? "No timestamped comments on this video" : `${count} timestamped comment${count === 1 ? "" : "s"}`,
+      4000
+    );
+    console.log(`[YouTube Community] ${count} timestamped comments for ${videoId}`);
+    return video;
   }
 
-  // Resolves to the comments to save, or undefined when nothing needs saving.
-  async function loadComments(videoId, durationSeconds) {
-    // null means nothing is saved yet; undefined means the read failed.
-    let stored = await attempt("saved comments", videoId, () => callBackground("getStoredComments", { videoId }));
-    if (videoId !== lastVideoId) return undefined;
-    // Skip YouTube when Firebase is unreachable, so an outage can't burn quota with full rescans on every visit.
-    if (stored === undefined) return undefined;
-    // Saves from before timestamp filtering have no scannedCount and include comments without timestamps.
-    if (stored && stored.scannedCount === undefined) stored = null;
+  // Reads the transcript and chapters in this browser and sends them to the server to share.
+  async function refreshContent(videoId, video) {
+    const needTranscript = isStale(video.transcriptFetchedAt);
+    const needChapters = isStale(video.chaptersFetchedAt);
+    if (!needTranscript && !needChapters) return;
 
-    if (stored) {
-      setOverlayComments(stored.items ?? []);
-      const ageMs = Date.now() - stored.fetchedAt;
-      if (ageMs < COMMENTS_REFRESH_MS) {
+    const { durationSeconds, captionTracks } = await fetchVideoInfo(videoId);
+    const transcript = needTranscript ? await attempt("transcript", videoId, () => fetchTranscript(captionTracks)) : undefined;
+    const chapters = needChapters ? await attempt("chapters", videoId, () => fetchChapters(videoId, durationSeconds)) : undefined;
+    if (videoId !== lastVideoId) return;
+
+    if (transcript) {
+      const preview = transcript.lines.slice(0, 100).map((line) => `[${formatTime(line.start)}] ${line.text}`).join("\n");
+      console.log(
+        `[YouTube Community] Transcript for ${videoId} (${transcript.languageCode}` +
+          `${transcript.autoGenerated ? ", auto-generated" : ""}, ${transcript.lines.length} lines):\n${preview}`
+      );
+    } else if (transcript === null) {
+      console.log(`[YouTube Community] No transcript available for ${videoId}`);
+    }
+    if (chapters) {
+      for (const kind of ["creator", "auto"]) {
+        const list = chapters[kind].map((c) => `[${formatTime(c.start)}] ${c.title}`).join("\n");
         console.log(
-          `[YouTube Community] Using ${stored.items?.length ?? 0} saved timestamped comments for ${videoId} ` +
-            `(refreshed ${Math.round(ageMs / 60000)} min ago)`
+          chapters[kind].length > 0
+            ? `[YouTube Community] ${chapters[kind].length} ${kind} chapters for ${videoId}:\n${list}`
+            : `[YouTube Community] No ${kind} chapters for ${videoId}`
         );
-        return undefined;
       }
     }
 
-    const result = await attempt("comments", videoId, () => refreshComments(videoId, durationSeconds, stored));
-    if (!result) return undefined;
-    console.log(
-      `[YouTube Community] ${stored ? "Refreshed" : "Scanned"} ${result.newlyScanned} ${stored ? "new " : ""}comments ` +
-        `for ${videoId} in ${result.pages} request${result.pages === 1 ? "" : "s"}, ` +
-        `${result.saved.items.length} timestamped in total` +
-        (result.hitPageCap ? ` (stopped at the ${MAX_COMMENT_PAGES}-page cap)` : "")
-    );
-    return result.saved;
+    // undefined fields (fetch failed) are left out of the message, so the server keeps its saved copy.
+    if (transcript === undefined && chapters === undefined) return;
+    await callBackground("saveContent", { videoId, transcript, chapters });
+    console.log(`[YouTube Community] Saved ${[transcript !== undefined && "transcript", chapters && "chapters"].filter(Boolean).join(" and ")} for ${videoId}`);
   }
 
   async function syncVideo() {
     const videoId = new URLSearchParams(location.search).get("v");
     if (location.pathname !== "/watch" || !videoId || videoId === lastVideoId) return;
+    if (!(await hasConsent())) return;
     lastVideoId = videoId;
     setOverlayComments([]);
+    setOverlayStatus(null);
 
     try {
-      const { durationSeconds, captionTracks } = await fetchVideoInfo(videoId);
-
-      const comments = await loadComments(videoId, durationSeconds);
-      if (videoId !== lastVideoId) return;
-
-      const transcript = await attempt("transcript", videoId, () => fetchTranscript(captionTracks));
-      if (transcript) {
-        const preview = transcript.lines
-          .slice(0, 100)
-          .map((line) => `[${formatTime(line.start)}] ${line.text}`)
-          .join("\n");
-        console.log(
-          `[YouTube Community] Transcript for ${videoId} (${transcript.languageCode}` +
-            `${transcript.autoGenerated ? ", auto-generated" : ""}, ${transcript.lines.length} lines):\n${preview}`
-        );
-      } else if (transcript === null) {
-        console.log(`[YouTube Community] No transcript available for ${videoId}`);
-      }
-
-      const chapters = await attempt("chapters", videoId, () => fetchCreatorChapters(videoId, durationSeconds));
-      if (chapters) {
-        const list = chapters.map((c) => `[${formatTime(c.start)}] ${c.title}`).join("\n");
-        console.log(
-          chapters.length > 0
-            ? `[YouTube Community] ${chapters.length} creator chapters for ${videoId}:\n${list}`
-            : `[YouTube Community] No creator chapters for ${videoId}`
-        );
-      }
-
-      try {
-        await callBackground("saveVideo", { videoId, transcript, chapters, comments });
-      } catch (err) {
-        if (!chrome.runtime?.id) throw err;
-        console.error(`[YouTube Community] Failed to save ${videoId} to Firebase: ${err.message}`);
-        return;
-      }
-
-      const saved = [];
-      if (transcript) saved.push("transcript");
-      if (chapters?.length > 0) saved.push(`${chapters.length} chapters`);
-      if (comments) saved.push(`${comments.items.length} timestamped comments`);
-      if (saved.length > 0) console.log(`[YouTube Community] Saved ${saved.join(", ")} for ${videoId} to Firebase`);
+      const video = await loadComments(videoId);
+      if (video) await refreshContent(videoId, video);
     } catch (err) {
       // chrome.runtime.id disappears when the extension is reloaded while this tab stays open.
       if (!chrome.runtime?.id) {
@@ -148,8 +112,20 @@
         return;
       }
       console.error(`[YouTube Community] Error syncing ${videoId}`, err);
+      if (videoId === lastVideoId) setOverlayStatus("Couldn't load comments", 4000);
     }
   }
+
+  chrome.storage.onChanged.addListener((changes, area) => {
+    if (area !== "local" || !(CONSENT_KEY in changes)) return;
+    if (changes[CONSENT_KEY].newValue) {
+      syncVideo();
+    } else {
+      lastVideoId = null;
+      setOverlayComments([]);
+      setOverlayStatus(null);
+    }
+  });
 
   // YouTube is a single-page app, so in-app navigation to another video doesn't reload the content script.
   document.addEventListener("yt-navigate-finish", syncVideo);

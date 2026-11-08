@@ -1,30 +1,65 @@
 Folder containing the chrome extension.
 
-## Firebase setup (one time)
+## How it fits together
 
-1. In the [Firebase console](https://console.firebase.google.com), open your project.
-2. **Build → Realtime Database → Create Database**. Pick a location and start in **locked mode**.
-3. On the database's **Rules** tab, paste the contents of `database.rules.json` and click **Publish**. Re-publish whenever that file changes.
-4. **Build → Authentication → Get started → Sign-in method**, then enable **Anonymous**.
-5. **Project settings** (gear icon) **→ General → Your apps**. If there's no web app, add one (the `</>` icon). Under **SDK setup and configuration**, choose **Config** and copy `apiKey` and `databaseURL`.
-6. Get a YouTube API key for fetching comments. In the [Google Cloud console](https://console.cloud.google.com) with your Firebase project selected:
-   - **APIs & Services → Library**, search for **YouTube Data API v3**, and click **Enable**.
-   - **APIs & Services → Credentials → Create credentials → API key**. Edit the new key, set **API restrictions** to **YouTube Data API v3**, and save.
-7. Copy `config.example.js` to `config.js` and fill in all three values.
+```
+extension (in the user's browser)  ──>  Cloudflare Worker (worker/)  ──>  Firebase Realtime Database
+  reads transcripts/chapters             holds the API keys                 locked: only the Worker
+  from YouTube, shows comments           fetches comments from the          can read or write
+                                         YouTube Data API
+```
 
-`config.js` is gitignored, so share its values with partners privately. The extension won't load until it exists.
+The extension contains no secrets. The Worker holds the YouTube API key and a Firebase service account, rate-limits each IP address, and stops refreshing from YouTube before the daily quota runs out (saved data is still served).
+
+## Setup (one time)
+
+### 1. Firebase
+
+1. In the [Firebase console](https://console.firebase.google.com), open your project. Create a Realtime Database if you haven't (**Build → Realtime Database**).
+2. On the database's **Rules** tab, paste the contents of `database.rules.json` and click **Publish**.
+3. **Build → Authentication → Sign-in method**: disable **Anonymous** (the extension no longer signs in).
+4. **Project settings → Service accounts → Generate new private key**. This downloads a JSON file that grants full database access. Never commit it or send it to anyone. You'll paste it into the Worker below, then delete the file.
+
+### 2. YouTube API key
+
+In the [Google Cloud console](https://console.cloud.google.com), with your Firebase project selected, create a fresh key: **APIs & Services → Credentials → Create credentials → API key**. Restrict it to **YouTube Data API v3** (this API must be enabled under **Library**). Then delete the old key that's in `config.js`.
+
+### 3. Cloudflare Worker
+
+Needs a free [Cloudflare account](https://dash.cloudflare.com/sign-up) and Node 18+. From the `worker` folder:
+
+1. Set `FIREBASE_DATABASE_URL` in `wrangler.toml` to your database URL.
+2. Fill in your contact email where `privacy.html` says `CONTACT_EMAIL` (in `worker/src/`; it appears twice).
+3. Run:
+
+   ```sh
+   npx wrangler login
+   npx wrangler secret put YOUTUBE_API_KEY            # paste the new key
+   npx wrangler secret put FIREBASE_SERVICE_ACCOUNT < path/to/service-account.json
+   npx wrangler secret put NOTES_TOKEN                # make up a long random password
+   npx wrangler deploy
+   ```
+
+4. `deploy` prints the Worker's URL (`https://youtube-community.<you>.workers.dev`). Put it in `endpoints.js` in this folder.
+
+Your privacy policy is now live at `<worker URL>/privacy`. Re-run `npx wrangler deploy` after changing anything in `worker/`.
 
 ## Install (unpacked, for development)
 
 1. Open Chrome and go to `chrome://extensions`.
 2. Enable **Developer mode** (toggle in the top right).
-3. Click **Load unpacked**.
-4. Select this `chrome-extension` folder.
-5. The extension icon will appear in the toolbar. Click it to see the popup.
+3. Click **Load unpacked**, then select this `chrome-extension` folder.
+4. A welcome tab opens. The extension stays off until you click **Agree and turn on**.
 
-After editing files, click the refresh icon on the extension's card in `chrome://extensions`, then reload any open YouTube tab to pick up content script changes.
+After editing files, click the refresh icon on the extension's card in `chrome://extensions`, then reload any open YouTube tab.
 
-## Database layout
+## Publishing to the Chrome Web Store
+
+1. Bump `version` in `manifest.json` (every upload needs a higher version).
+2. Run `scripts/package.sh`. It builds `dist/youtube-community-<version>.zip` containing only the extension files.
+3. Upload the zip in the [Chrome Web Store developer dashboard](https://chrome.google.com/webstore/devconsole). Set **Visibility** to **Unlisted**, and enter `<worker URL>/privacy` as the privacy policy URL.
+
+## What gets stored
 
 Each video is stored under its YouTube video ID (the `v=` part of the URL). All times are in seconds.
 
@@ -32,27 +67,30 @@ Each video is stored under its YouTube video ID (the `v=` part of the URL). All 
 videos/
   {videoId}/
     transcript:     { languageCode, autoGenerated, fetchedAt, lines: [{ start, duration, text }] }
-    comments:       { fetchedAt, scannedCount, items: [{ id, author, text, timestamp, likeCount, replyCount, publishedAt }] }
+    comments:       { fetchedAt, fullScanAt, durationSeconds, scannedCount,
+                      items: [{ id, author, text, timestamp, likeCount, replyCount, publishedAt }] }
+    commentScan:    (a comment scan in progress)
     chapters:
       creator:      { fetchedAt, items: [{ title, start, duration }] }
+      auto:         { fetchedAt, items: [{ title, start, duration }] }
       generated:    (reserved for chapters we generate)
     communityNotes:
       {noteId}:     { text, start, duration, author, createdAt }
+expiry/{videoId}:   when each kind of data above was last refreshed (used for cleanup)
+quota/{day}:        YouTube quota units used today
 ```
 
-Only comments with a valid timestamp are saved. A comment's `timestamp` is the first time mentioned in its text, in seconds (`"1:30 so cute"` → `90`). Times past the end of the video don't count. `scannedCount` is how many comments were checked in total.
+Only comments with a timestamp are saved. A comment's `timestamp` is the first time mentioned in its text, in seconds (`"1:30 so cute"` → `90`). Times past the end of the video don't count. `scannedCount` is roughly how many top-level comments were checked (replies aren't included).
 
-Comments on screen come from this database, not straight from YouTube. When you open a video:
+**Comments.** When a video is opened, the Worker returns its saved comments, refreshing them first if needed:
 
-- **Saved less than 3 hours ago:** the saved comments are shown and YouTube isn't contacted.
-- **Saved longer ago:** the saved comments are shown right away, then only comments posted since the last refresh are fetched (newest first) and added. This usually costs 1 quota unit.
-- **Never saved:** all of the video's top-level comments are scanned (replies aren't included), up to 10,000. To change that cap, edit `MAX_COMMENT_PAGES` in `content.js`.
+- **Refreshed less than 3 hours ago:** saved comments are returned as-is.
+- **Otherwise:** only comments posted since the last refresh are fetched and added, usually 1 quota unit.
+- **Every 3 days** (and the first time a video is opened): a full rescan re-reads all of its comments, up to 10,000, updating like counts and dropping deleted comments. That's 1 quota unit per 100 comments, spread across several requests from the extension, with comments appearing as they arrive.
 
-Each 100 comments fetched costs 1 unit of the 10,000-unit daily YouTube API quota. If Firebase can't be reached, YouTube isn't contacted either, so an outage can't use up quota. `fetchedAt` is when the last refresh started.
+**Transcripts and chapters** are read from YouTube by the extension in the viewer's browser, at most once a day per video, and sent to the Worker. The Worker only accepts them for videos it has confirmed exist.
 
-`chapters/creator` holds only chapters the creator wrote. YouTube's auto-generated chapters are excluded. Videos without creator chapters have no `chapters/creator` entry. The last chapter's `duration` runs to the end of the video. It's left out for live streams, where the length isn't known.
-
-When you watch a video, the extension saves `transcript` and `chapters/creator`, replacing any previous copy, and updates `comments` as described above. It never touches `chapters/generated`, `communityNotes`, or anything else you add under a video.
+**Cleanup.** YouTube's API policies require stored data to be refreshed or deleted within 30 days. Once a day, the Worker deletes any transcript, chapters, or comments not refreshed in 29 days. Community notes and `chapters/generated` are never deleted.
 
 ## Adding community notes
 
@@ -63,9 +101,9 @@ A community note is text shown during part of a video: from `start` seconds for 
 | `text`     | yes      | string | The note, 1–1000 characters              |
 | `start`    | yes      | number | When to start showing it, in seconds     |
 | `duration` | yes      | number | How long to show it, in seconds (> 0)    |
-| `author`   | no       | string | Who wrote it                             |
+| `author`   | no       | string | Who wrote it, up to 100 characters       |
 
-`createdAt` is added automatically. The database rejects notes missing a required field.
+`createdAt` is added automatically. If any note is invalid, none are added.
 
 **To push a set of notes**, put them in a JSON file, e.g. `notes.json`:
 
@@ -76,20 +114,33 @@ A community note is text shown during part of a video: from `start` seconds for 
 ]
 ```
 
-Then, from the `chrome-extension` folder (needs Node 18+ and a filled-in `config.js`):
+Then, from the `chrome-extension` folder (needs Node 18+ and the `NOTES_TOKEN` you set on the Worker, shared privately):
 
 ```sh
-node scripts/push-notes.mjs dQw4w9WgXcQ notes.json
+NOTES_TOKEN=your-token node scripts/push-notes.mjs dQw4w9WgXcQ notes.json
 ```
 
-Each note gets its own unique ID, so running the script twice adds the notes twice, and partners pushing at the same time never overwrite each other. To fix or delete a note, edit it in the Firebase console under **Realtime Database → Data**.
+Each note gets its own unique ID, so running the script twice adds the notes twice. To fix or delete a note, edit it in the Firebase console under **Realtime Database → Data**.
 
 ## What's included
 
-- `popup.html` / `popup.js` — toolbar popup with settings (comment font size).
-- `overlay.js` — shows timestamped comments along the top of the player from 5 seconds before their timestamp to 5 seconds after (up to 3 at once, most-liked first). Works in fullscreen and while the controls are hidden.
-- `content.js` / `content.css` — runs on `youtube.com` watch pages: loads comments, logs the first 100 transcript lines to the page's DevTools console, and asks the background worker to save the video's data. `content.css` styles the comment overlay.
-- `youtube.js` — reads YouTube's internal APIs: the video's length, its full caption track (same approach as the Python `youtube-transcript-api`), and its creator chapters.
-- `background.js` — fetches comments from the YouTube Data API 100 at a time, keeping only those with timestamps, signs in to Firebase anonymously, and reads and writes the database.
-- `database.rules.json` — security rules: signed-in users only, keys must be valid 11-character video IDs, community notes must have `text`, `start`, and `duration`.
+- `manifest.json`, `icons/` — extension definition and icons.
+- `welcome.html` / `welcome.js` — opens on install; the extension does nothing until the user accepts the privacy policy and YouTube's Terms of Service.
+- `popup.html` / `popup.js` — settings: show or hide comments, position (top or bottom; left, center, or right), which comments to show (all, down to the top 10% by likes), size, and background darkness. Also links to the policies and a switch to turn the extension off.
+- `settings.js` — the settings' default values, shared by the popup and the player.
+- `overlay.js` — everything drawn on the player:
+  - timestamped comments with their like counts, from 5 seconds before their timestamp until 5–10 seconds after (longer comments stay longer), up to 3 at once. A comment on screen isn't replaced until its time is up, so busy stretches don't flicker.
+  - comments that list several times ("0:00 intro / 2:15 the drop") are split so each part shows at its own time.
+  - hovering a comment keeps it on screen and shows all of it; clicking it pauses the video and opens the comment on YouTube in a new tab.
+  - a status line ("Loading comments…", "No timestamped comments on this video").
+  - markers above the progress bar showing where comments are (taller means more). Hovering near one previews its most-liked comments above YouTube's thumbnail preview.
+  - a bubble button in the player controls, and the <kbd>B</kbd> key, to show or hide comments. Hidden in the miniplayer.
+- `content.js` / `content.css` — runs on YouTube watch pages: loads comments, reads the transcript and chapters when they're due for a refresh (logging them to the page's DevTools console), and sends them to be saved.
+- `youtube.js` — reads YouTube's internal APIs: the video's length, its caption track, and its chapters.
+- `background.js` — relays requests from YouTube pages to the Worker.
+- `consent.js` — tracks whether the user has accepted the privacy policy.
+- `endpoints.js` — the Worker's URL.
+- `worker/` — the Cloudflare Worker: API, rate limits, daily cleanup, and the privacy policy page.
+- `database.rules.json` — blocks all direct database access; only the Worker's service account can read or write.
 - `scripts/push-notes.mjs` — pushes a JSON file of community notes for one video.
+- `scripts/package.sh` — builds the zip for the Chrome Web Store.

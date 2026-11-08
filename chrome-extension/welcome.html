@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Welcome to YouTube Community</title>
+    <style>
+      body { max-width: 620px; margin: 48px auto; padding: 0 16px; font: 16px/1.6 Roboto, Arial, sans-serif; color: #0f0f0f; }
+      h1 { font-size: 1.6em; font-weight: 500; }
+      a { color: #065fd4; }
+      button { margin-top: 12px; padding: 10px 20px; border: 0; border-radius: 20px; background: #0f0f0f; color: #fff; font: inherit; font-weight: 500; cursor: pointer; }
+      #done { margin-top: 16px; font-weight: 500; }
+    </style>
+  </head>
+  <body>
+    <h1>Welcome to YouTube Community</h1>
+    <p>
+      This extension shows timestamped YouTube comments over the video right when they come up. To do that, it sends
+      the ID of each YouTube video you watch to our server, which looks up that video's public comments, captions,
+      and chapters using YouTube API Services and stores them for up to 29 days. It never accesses your Google
+      account and doesn't store anything that identifies you.
+    </p>
+    <p>
+      By turning it on, you agree to our <a id="privacy-link" target="_blank">privacy policy</a> and to be bound by
+      the <a href="https://www.youtube.com/t/terms" target="_blank">YouTube Terms of Service</a>. Google's handling
+      of data is covered by the <a href="https://policies.google.com/privacy" target="_blank">Google Privacy Policy</a>.
+    </p>
+    <button id="agree">Agree and turn on</button>
+    <p id="done" hidden>You're all set. Open any YouTube video to see comments appear. You can turn the extension off in its popup.</p>
+
+    <script src="endpoints.js"></script>
+    <script src="consent.js"></script>
+    <script src="welcome.js"></script>
+  </body>
+</html>

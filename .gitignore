@@ -1,2 +1,7 @@
 *.DS_Store
 chrome-extension/config.js
+chrome-extension/dist/
+node_modules/
+.wrangler/
+# Firebase service account keys
+*firebase-adminsdk*.json

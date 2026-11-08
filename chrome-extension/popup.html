@@ -12,32 +12,95 @@
         color: #0f0f0f;
       }
       h1 {
-        margin: 0 0 16px;
+        margin: 0 0 14px;
         font-size: 16px;
         font-weight: 500;
       }
-      label {
+      label,
+      .setting-name {
         display: flex;
         justify-content: space-between;
         margin-bottom: 6px;
         font-weight: 500;
       }
+      .value {
+        font-weight: normal;
+        color: #606060;
+      }
       input[type="range"] {
         width: 100%;
-        margin: 0 0 12px;
+        margin: 0 0 14px;
         accent-color: #f00;
+      }
+      /* Left is "All", right is "Top 10%". */
+      #top-percent {
+        direction: rtl;
+        margin-bottom: 4px;
+      }
+      .range-ends {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 14px;
+        color: #606060;
+        font-size: 11px;
+      }
+      .switch-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 4px;
+      }
+      .switch-row input {
+        width: 16px;
+        height: 16px;
+        margin: 0;
+        accent-color: #f00;
+      }
+      .hint {
+        margin: 0 0 14px;
+        color: #606060;
+        font-size: 11px;
+      }
+      kbd {
+        padding: 0 4px;
+        border: 1px solid #ccc;
+        border-radius: 3px;
+        font-family: inherit;
+      }
+      /* A miniature player with the six places the comments can go. */
+      .position-picker {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        grid-template-rows: 1fr 1fr;
+        gap: 4px;
+        height: 64px;
+        margin-bottom: 14px;
+        padding: 6px;
+        border-radius: 8px;
+        background: #282828;
+      }
+      .position-picker button {
+        border: 0;
+        border-radius: 4px;
+        background: rgba(255, 255, 255, 0.12);
+        cursor: pointer;
+      }
+      .position-picker button:hover {
+        background: rgba(255, 255, 255, 0.25);
+      }
+      .position-picker button[aria-pressed="true"] {
+        background: #f00;
       }
       .preview {
         display: flex;
         justify-content: center;
         padding: 12px;
         border-radius: 8px;
-        background: #282828;
+        background: linear-gradient(135deg, #5a7d9a, #c9a66b);
       }
       .preview-comment {
         padding: 0.4em 0.75em;
         border-radius: 0.6em;
-        background-color: rgba(0, 0, 0, 0.6);
         color: #fff;
         line-height: 1.3;
       }
@@ -45,18 +108,96 @@
         font-size: 0.75em;
         color: rgba(255, 255, 255, 0.7);
       }
+      .consent {
+        margin-bottom: 16px;
+        padding: 12px;
+        border-radius: 8px;
+        background: #f2f2f2;
+      }
+      .consent p {
+        margin: 0 0 8px;
+      }
+      .consent button {
+        padding: 6px 12px;
+        border: 0;
+        border-radius: 16px;
+        background: #0f0f0f;
+        color: #fff;
+        font: inherit;
+        font-weight: 500;
+        cursor: pointer;
+      }
+      footer {
+        margin-top: 16px;
+        color: #606060;
+        font-size: 11px;
+        line-height: 1.6;
+      }
+      footer a,
+      .link-button {
+        color: #065fd4;
+      }
+      .link-button {
+        padding: 0;
+        border: 0;
+        background: none;
+        font: inherit;
+        text-decoration: underline;
+        cursor: pointer;
+      }
+      [hidden] {
+        display: none !important;
+      }
     </style>
   </head>
   <body>
     <h1>YouTube Community</h1>
-    <label for="font-size">Comment size <span id="font-size-value"></span></label>
+
+    <div class="consent" id="consent-needed" hidden>
+      <p>The extension is off until you review and accept the privacy policy.</p>
+      <button id="review">Review and turn on</button>
+    </div>
+
+    <label class="switch-row" for="overlay-enabled">Show comments on videos <input id="overlay-enabled" type="checkbox" /></label>
+    <p class="hint">Or press <kbd>B</kbd> or the bubble button in the player.</p>
+
+    <div class="setting-name">Position <span class="value" id="position-value"></span></div>
+    <div class="position-picker" id="position-picker">
+      <button data-position="top-left" aria-label="Top left"></button>
+      <button data-position="top-center" aria-label="Top center"></button>
+      <button data-position="top-right" aria-label="Top right"></button>
+      <button data-position="bottom-left" aria-label="Bottom left"></button>
+      <button data-position="bottom-center" aria-label="Bottom center"></button>
+      <button data-position="bottom-right" aria-label="Bottom right"></button>
+    </div>
+
+    <label for="top-percent">Comments shown <span class="value" id="top-percent-value"></span></label>
+    <input id="top-percent" type="range" min="10" max="100" step="5" />
+    <div class="range-ends"><span>All</span><span>Most liked only</span></div>
+
+    <label for="font-size">Size <span class="value" id="font-size-value"></span></label>
     <input id="font-size" type="range" min="12" max="32" step="1" />
+
+    <label for="background-opacity">Background <span class="value" id="background-opacity-value"></span></label>
+    <input id="background-opacity" type="range" min="20" max="100" step="5" />
+
     <div class="preview">
       <div class="preview-comment" id="preview">
-        <div class="preview-author">@viewer</div>
+        <div class="preview-author">@viewer · 👍 1.2K</div>
         <div>1:30 that dog is so cute!</div>
       </div>
     </div>
+
+    <footer>
+      <a id="privacy-link" target="_blank">Privacy policy</a> ·
+      <a href="https://www.youtube.com/t/terms" target="_blank">YouTube Terms of Service</a> ·
+      <a href="https://policies.google.com/privacy" target="_blank">Google Privacy Policy</a>
+      <div id="turn-off-row" hidden><button class="link-button" id="turn-off">Turn off the extension</button></div>
+    </footer>
+
+    <script src="endpoints.js"></script>
+    <script src="consent.js"></script>
+    <script src="settings.js"></script>
     <script src="popup.js"></script>
   </body>
 </html>

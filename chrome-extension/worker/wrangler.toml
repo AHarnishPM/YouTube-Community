@@ -1,0 +1,28 @@
+name = "youtube-community"
+main = "src/index.js"
+compatibility_date = "2025-10-01"
+
+[vars]
+# Your Realtime Database URL, from the Firebase console's Realtime Database page.
+FIREBASE_DATABASE_URL = "https://community-7fe8f-default-rtdb.firebaseio.com"
+
+# Secrets (set with `npx wrangler secret put NAME`, never written here):
+#   YOUTUBE_API_KEY           YouTube Data API v3 key
+#   FIREBASE_SERVICE_ACCOUNT  the whole service account JSON file
+#   NOTES_TOKEN               password partners use to push community notes
+
+# Daily cleanup of data older than 29 days (04:17 UTC).
+[triggers]
+crons = ["17 4 * * *"]
+
+# Requests per IP address per minute.
+[[ratelimits]]
+name = "REQUEST_LIMITER"
+namespace_id = "1001"
+simple = { limit = 60, period = 60 }
+
+# Full comment scans (up to 100 quota units each) started per IP address per minute.
+[[ratelimits]]
+name = "SCAN_LIMITER"
+namespace_id = "1002"
+simple = { limit = 3, period = 60 }

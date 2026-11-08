@@ -1,27 +1,44 @@
 {
   "manifest_version": 3,
   "name": "YouTube Community",
-  "version": "0.1.0",
-  "description": "Extension for interacting with YouTube.",
+  "version": "1.1.1",
+  "description": "Shows timestamped YouTube comments over the video at the moment they refer to.",
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
   "action": {
-    "default_popup": "popup.html"
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png"
+    }
   },
   "background": {
     "service_worker": "background.js"
   },
-  "permissions": ["storage"],
+  "permissions": [
+    "storage"
+  ],
   "host_permissions": [
-    "https://*.firebaseio.com/*",
-    "https://*.firebasedatabase.app/*",
-    "https://identitytoolkit.googleapis.com/*",
-    "https://securetoken.googleapis.com/*",
-    "https://www.googleapis.com/*"
+    "https://youtube-community.ytcommunity.workers.dev/*"
   ],
   "content_scripts": [
     {
-      "matches": ["https://www.youtube.com/*"],
-      "js": ["youtube.js", "overlay.js", "content.js"],
-      "css": ["content.css"]
+      "matches": [
+        "https://www.youtube.com/*"
+      ],
+      "js": [
+        "consent.js",
+        "settings.js",
+        "youtube.js",
+        "overlay.js",
+        "content.js"
+      ],
+      "css": [
+        "content.css"
+      ]
     }
   ]
 }
