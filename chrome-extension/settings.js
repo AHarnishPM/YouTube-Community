@@ -7,13 +7,13 @@ const DEFAULT_SETTINGS = {
   customX: 0.5,
   customY: 0.05,
   // Comments appear this many seconds before their timestamp and stay until this many seconds after.
+  // (A negative leadSeconds means they appear after the timestamp.)
   leadSeconds: 2.5,
   lingerSeconds: 5.5,
   fontSize: 16,
   // Percent of the background's darkness, 20–100.
   backgroundOpacity: 60,
-  // Percent of a video's timestamped comments to show, ranked by likes (100 = all).
-  topPercent: 100,
+  showZeroLikes: true,
 };
 
 const TOGGLE_SHORTCUT_KEY = "b";

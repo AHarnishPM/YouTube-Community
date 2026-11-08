@@ -126,10 +126,10 @@ Each note gets its own unique ID, so running the script twice adds the notes twi
 
 - `manifest.json`, `icons/` — extension definition and icons.
 - `welcome.html` / `welcome.js` — opens on install; the extension does nothing until the user accepts the privacy policy and YouTube's Terms of Service.
-- `popup.html` / `popup.js` — settings: show or hide comments, position (top or bottom; left, center, or right), how long before and after their timestamp comments show, which comments to show (all, down to the top 10% by likes), size, and background darkness. Also links to the policies and a switch to turn the extension off.
+- `popup.html` / `popup.js` — settings: show or hide comments, position (top or bottom; left, center, or right), when comments appear and disappear (one slider with two dots, from 5 seconds before the timestamp to 10 after), whether to show comments with 0 likes, size, and background darkness. Also links to the policies and a switch to turn the extension off.
 - `settings.js` — the settings' default values, shared by the popup and the player.
 - `overlay.js` — everything drawn on the player:
-  - timestamped comments with their like counts, from 2.5 seconds before their timestamp until 5.5–10.5 seconds after by default (adjustable in the popup; longer comments stay longer), up to 3 at once. Dragging a comment moves them anywhere on the player. A comment on screen isn't replaced until its time is up, so busy stretches don't flicker.
+  - timestamped comments with their like counts, from 2.5 seconds before their timestamp until 5.5–10.5 seconds after by default (adjustable in the popup; longer comments stay longer), up to 3 at once, most-liked first. Dragging a comment moves them anywhere on the player. A comment on screen isn't replaced until its time is up, so busy stretches don't flicker.
   - comments that list several times ("0:00 intro / 2:15 the drop") are split so each part shows at its own time.
   - hovering a comment keeps it on screen and shows all of it; clicking it pauses the video and opens the comment on YouTube in a new tab.
   - a status line ("Loading comments…", "No timestamped comments on this video").

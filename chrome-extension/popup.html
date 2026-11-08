@@ -32,17 +32,89 @@
         margin: 0 0 14px;
         accent-color: #f00;
       }
-      /* Left is "All", right is "Top 10%". */
-      #top-percent {
-        direction: rtl;
-        margin-bottom: 4px;
+      /* Two range inputs stacked on one track; only their thumbs take clicks, so either can be dragged. */
+      .dual-range {
+        position: relative;
+        height: 18px;
+        margin-bottom: 2px;
       }
-      .range-ends {
-        display: flex;
-        justify-content: space-between;
+      /* Inset by half a dot, so percentages line up with the dot centers. */
+      .dual-range-rail {
+        position: absolute;
+        inset: 0 8px;
+      }
+      .dual-range-track,
+      .dual-range-fill,
+      .dual-range-zero {
+        position: absolute;
+        top: 7px;
+        height: 4px;
+        border-radius: 2px;
+      }
+      .dual-range-track {
+        left: 0;
+        right: 0;
+        background: #ddd;
+      }
+      .dual-range-fill {
+        background: #f00;
+      }
+      /* Marks the timestamp itself. */
+      .dual-range-zero {
+        top: 3px;
+        width: 2px;
+        height: 12px;
+        margin-left: -1px;
+        border-radius: 1px;
+        background: #0f0f0f;
+      }
+      .dual-range input {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 18px;
+        margin: 0;
+        background: none;
+        pointer-events: none;
+        -webkit-appearance: none;
+        appearance: none;
+      }
+      .dual-range input::-webkit-slider-runnable-track {
+        background: none;
+      }
+      .dual-range input::-webkit-slider-thumb {
+        width: 16px;
+        height: 16px;
+        border: 0;
+        border-radius: 50%;
+        background: #f00;
+        cursor: pointer;
+        pointer-events: auto;
+        -webkit-appearance: none;
+        appearance: none;
+      }
+      .dual-range input:focus-visible::-webkit-slider-thumb {
+        outline: 2px solid #065fd4;
+        outline-offset: 2px;
+      }
+      .timing-ends {
+        position: relative;
+        height: 14px;
         margin-bottom: 14px;
         color: #606060;
         font-size: 11px;
+      }
+      .timing-ends span {
+        position: absolute;
+      }
+      .timing-ends span:first-child {
+        left: 0;
+      }
+      .timing-ends span:last-child {
+        right: 0;
+      }
+      .timing-ends-zero {
+        transform: translateX(-50%);
       }
       .switch-row {
         display: flex;
@@ -172,15 +244,22 @@
     </div>
     <p class="hint position-hint">Or drag a comment on the video to put them anywhere.</p>
 
-    <label for="lead-seconds">Appear <span class="value" id="lead-seconds-value"></span></label>
-    <input id="lead-seconds" type="range" min="0" max="10" step="0.5" />
+    <div class="setting-name">On screen <span class="value" id="timing-value"></span></div>
+    <div class="dual-range">
+      <div class="dual-range-rail">
+        <div class="dual-range-track"></div>
+        <div class="dual-range-fill" id="timing-fill"></div>
+        <div class="dual-range-zero" id="timing-zero"></div>
+      </div>
+      <input id="timing-start" type="range" min="-5" max="10" step="0.5" aria-label="Appear, seconds relative to the timestamp" />
+      <input id="timing-end" type="range" min="-5" max="10" step="0.5" aria-label="Disappear, seconds relative to the timestamp" />
+    </div>
+    <div class="timing-ends">
+      <span>5s before</span><span class="timing-ends-zero" id="timing-zero-label">timestamp</span><span>10s after</span>
+    </div>
 
-    <label for="linger-seconds">Stay until <span class="value" id="linger-seconds-value"></span></label>
-    <input id="linger-seconds" type="range" min="1" max="15" step="0.5" />
-
-    <label for="top-percent">Comments shown <span class="value" id="top-percent-value"></span></label>
-    <input id="top-percent" type="range" min="10" max="100" step="5" />
-    <div class="range-ends"><span>All</span><span>Most liked only</span></div>
+    <label class="switch-row" for="show-zero-likes">Show comments with 0 likes <input id="show-zero-likes" type="checkbox" /></label>
+    <div style="height: 10px"></div>
 
     <label for="font-size">Size <span class="value" id="font-size-value"></span></label>
     <input id="font-size" type="range" min="12" max="32" step="1" />

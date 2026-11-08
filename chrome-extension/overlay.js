@@ -29,7 +29,7 @@ chrome.storage.onChanged.addListener((changes, area) => {
     if (key in DEFAULT_SETTINGS) settings[key] = newValue ?? DEFAULT_SETTINGS[key];
   }
   applySettings();
-  if (changes.topPercent) rebuildEntries();
+  if (changes.showZeroLikes) rebuildEntries();
 });
 
 const likeFormat = new Intl.NumberFormat(undefined, { notation: "compact", maximumFractionDigits: 1 });
@@ -103,11 +103,9 @@ function splitComment(comment, duration) {
 }
 
 function rebuildEntries() {
-  const keep = Math.max(1, Math.ceil((videoComments.length * settings.topPercent) / 100));
   const duration = videoDuration();
-  overlayEntries = [...videoComments]
-    .sort((a, b) => (b.likeCount ?? 0) - (a.likeCount ?? 0))
-    .slice(0, keep)
+  overlayEntries = videoComments
+    .filter((comment) => settings.showZeroLikes || (comment.likeCount ?? 0) > 0)
     .flatMap((comment) => splitComment(comment, duration));
   renderMarkers();
   renderOverlay(getVideo()?.currentTime ?? 0);

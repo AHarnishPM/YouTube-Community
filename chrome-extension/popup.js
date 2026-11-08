@@ -3,11 +3,8 @@ const positionButtons = document.querySelectorAll("#position-picker button");
 
 // Each slider: its settings key and how to show its value.
 const sliders = {
-  topPercent: { id: "top-percent", format: (v) => (v >= 100 ? "All" : `Top ${v}% by likes`) },
   fontSize: { id: "font-size", format: (v) => `${v}px` },
   backgroundOpacity: { id: "background-opacity", format: (v) => `${v}%` },
-  leadSeconds: { id: "lead-seconds", format: (v) => (v === 0 ? "at the timestamp" : `${v}s before the timestamp`) },
-  lingerSeconds: { id: "linger-seconds", format: (v) => `${v}s after the timestamp` },
 };
 
 function showPreview(key, value) {
@@ -36,8 +33,52 @@ function showPosition(position) {
 chrome.storage.sync.get(DEFAULT_SETTINGS, (settings) => {
   for (const key of Object.keys(sliders)) showSlider(key, settings[key]);
   showPosition(settings.position);
+  showTiming(-settings.leadSeconds, settings.lingerSeconds);
   document.getElementById("overlay-enabled").checked = settings.overlayEnabled;
+  zeroLikesBox.checked = settings.showZeroLikes;
 });
+
+// ---------- On-screen timing: one track, two dots ----------
+// Values are seconds relative to the timestamp: the left dot is when comments appear (negative = before),
+// the right dot is when they disappear.
+
+const timingStart = document.getElementById("timing-start");
+const timingEnd = document.getElementById("timing-end");
+const TIMING_MIN = Number(timingStart.min);
+const TIMING_MAX = Number(timingStart.max);
+const TIMING_GAP = 0.5;
+
+const percentAlong = (value) => ((value - TIMING_MIN) / (TIMING_MAX - TIMING_MIN)) * 100;
+
+function describeOffset(seconds) {
+  if (seconds === 0) return "at the timestamp";
+  return `${Math.abs(seconds)}s ${seconds < 0 ? "before" : "after"}`;
+}
+
+function showTiming(start, end) {
+  timingStart.value = start;
+  timingEnd.value = end;
+  const fill = document.getElementById("timing-fill");
+  fill.style.left = `${percentAlong(start)}%`;
+  fill.style.width = `${percentAlong(end) - percentAlong(start)}%`;
+  document.getElementById("timing-zero").style.left = `${percentAlong(0)}%`;
+  // The label sits under the timestamp mark (the rail is inset 8px from each side).
+  document.getElementById("timing-zero-label").style.left = `calc(8px + (100% - 16px) * ${percentAlong(0) / 100})`;
+  document.getElementById("timing-value").textContent = `${describeOffset(start)} → ${describeOffset(end)}`;
+}
+
+// The dots can't cross: each stops just short of the other.
+timingStart.addEventListener("input", () => {
+  showTiming(Math.min(Number(timingStart.value), Number(timingEnd.value) - TIMING_GAP), Number(timingEnd.value));
+});
+timingEnd.addEventListener("input", () => {
+  showTiming(Number(timingStart.value), Math.max(Number(timingEnd.value), Number(timingStart.value) + TIMING_GAP));
+});
+for (const input of [timingStart, timingEnd]) {
+  input.addEventListener("change", () =>
+    chrome.storage.sync.set({ leadSeconds: -Number(timingStart.value), lingerSeconds: Number(timingEnd.value) })
+  );
+}
 
 for (const [key, { id }] of Object.entries(sliders)) {
   const slider = document.getElementById(id);
@@ -54,6 +95,8 @@ for (const button of positionButtons) {
 }
 
 const enabledBox = document.getElementById("overlay-enabled");
+const zeroLikesBox = document.getElementById("show-zero-likes");
+zeroLikesBox.addEventListener("change", () => chrome.storage.sync.set({ showZeroLikes: zeroLikesBox.checked }));
 enabledBox.addEventListener("change", () => chrome.storage.sync.set({ overlayEnabled: enabledBox.checked }));
 
 // The player button and keyboard shortcut can change this while the popup is open.
